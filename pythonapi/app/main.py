@@ -15,6 +15,8 @@ from app.api.auth_endpoints import router as auth_router
 from app.api.users_endpoints import router as users_router
 from app.api.locations_endpoints import router as loc_router
 from app.api.pets_endpoints import router as pets_router
+from app.api.applications_endpoints import router as applications_router
+from app.api.favorites_endpoints import router as favorites_router
 from app.api.test_endpoints import router as test_router
 import uvicorn
 from pathlib import Path
@@ -40,10 +42,12 @@ app.add_middleware(
 )
 
 # Register API routers
-app.include_router(auth_router)   # Authentication: /auth/login, /auth/register, etc.
-app.include_router(users_router)  # User management: /users
-app.include_router(loc_router)    # Locations: /locations
-app.include_router(pets_router)   # Pets: /pets
+app.include_router(auth_router)           # Authentication: /auth/login, /auth/register, etc.
+app.include_router(users_router)          # User management: /users
+app.include_router(loc_router)            # Locations: /locations
+app.include_router(pets_router)           # Pets: /pets
+app.include_router(applications_router)   # Applications: /applications
+app.include_router(favorites_router)      # Favorites: /favorites
 
 # Test router for database reset (development only)
 app.include_router(test_router)

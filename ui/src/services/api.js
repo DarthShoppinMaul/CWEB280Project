@@ -4,197 +4,149 @@
 // All functions return promises that resolve to data or throw errors
 
 // Base URL for all API calls
-// Uses environment variable if available, otherwise defaults to localhost
-// In production, set VITE_API_BASE_URL in .env file
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
 
 // Export for use in components (e.g., for image URLs)
 export { API_BASE_URL };
 
 // Helper function: Handle fetch API responses
-// Converts response to JSON or throws an error if request failed
 const handleResponse = async (response) => {
-    // Check if response was successful (status 200-299)
     if (!response.ok) {
-        // Try to parse error message from response
         const error = await response.json().catch(() => ({ detail: 'Request failed' }));
-        // Throw error in a format similar to axios (for compatibility)
         throw { response: { status: response.status, data: error } };
     }
-    // If successful, return the JSON data
     return response.json();
 };
 
-// ============================================================================
+
 // AUTHENTICATION API
-// Functions for login, logout, registration, and checking current user
-// ============================================================================
+
 export const authAPI = {
-    // Function: Log in a user
     login: async (email, password) => {
         const response = await fetch(`${API_BASE_URL}/auth/login`, {
-            method: 'POST',                              // HTTP POST request
-            headers: {
-                'Content-Type': 'application/json',      // Sending JSON data
-            },
-            credentials: 'include',                       // Important: send/receive cookies
-            body: JSON.stringify({ email, password }),    // Convert data to JSON string
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ email, password }),
         });
         return handleResponse(response);
     },
 
-    // Function: Register a new user
     register: async (email, password, display_name) => {
         const response = await fetch(`${API_BASE_URL}/auth/register`, {
-            method: 'POST',                                          // HTTP POST request
-            headers: {
-                'Content-Type': 'application/json',                  // Sending JSON data
-            },
-            credentials: 'include',                                   // Important: send/receive cookies
-            body: JSON.stringify({ email, password, display_name }), // Convert data to JSON string
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ email, password, display_name }),
         });
         return handleResponse(response);
     },
 
-    // Function: Log out the current user
     logout: async () => {
         const response = await fetch(`${API_BASE_URL}/auth/logout`, {
-            method: 'POST',            // HTTP POST request
-            credentials: 'include',    // Send session cookie
+            method: 'POST',
+            credentials: 'include',
         });
         return handleResponse(response);
     },
 
-    // Function: Get current user info (check if logged in)
     me: async () => {
         try {
             const response = await fetch(`${API_BASE_URL}/auth/me`, {
-                credentials: 'include',    // Send session cookie
+                credentials: 'include',
             });
-            // If unauthorized (401), return null instead of throwing error
             if (response.status === 401) {
                 return null;
             }
             return handleResponse(response);
         } catch (error) {
-            // If any error, assume not logged in
             return null;
         }
     },
 };
 
-// ============================================================================
+
 // USERS API
-// Functions for managing user accounts (admin and self-management)
-// ============================================================================
+
 export const usersAPI = {
-    // Function: Get all users (admin only)
-    // Returns: Promise<User[]> - array of user objects
     list: async () => {
         const response = await fetch(`${API_BASE_URL}/users`, {
-            credentials: 'include',    // Send session cookie
+            credentials: 'include',
         });
         return handleResponse(response);
     },
 
-    // Function: Get a single user by ID
-    // Args: id - user ID
-    // Returns: Promise<User> - user object
     get: async (id) => {
         const response = await fetch(`${API_BASE_URL}/users/${id}`, {
-            credentials: 'include',    // Send session cookie
+            credentials: 'include',
         });
         return handleResponse(response);
     },
 
-    // Function: Update user information
-    // Args:
-    //   id - user ID
-    //   data - object with fields to update (display_name, email, password)
-    // Returns: Promise<User> - updated user object
     update: async (id, data) => {
         const response = await fetch(`${API_BASE_URL}/users/${id}`, {
-            method: 'PUT',                           // HTTP PUT request
-            headers: {
-                'Content-Type': 'application/json',  // Sending JSON
-            },
-            credentials: 'include',                  // Send session cookie
-            body: JSON.stringify(data),              // Convert data to JSON
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify(data),
         });
         return handleResponse(response);
     },
 
-    // Function: Delete user account
-    // Args: id - user ID
-    // Returns: Promise<Object> - success message
     delete: async (id) => {
         const response = await fetch(`${API_BASE_URL}/users/${id}`, {
-            method: 'DELETE',          // HTTP DELETE request
-            credentials: 'include',    // Send session cookie
+            method: 'DELETE',
+            credentials: 'include',
         });
         return handleResponse(response);
     },
 
-    // Function: Create new user (admin only)
-    // Args: data - object with email, password, display_name, is_admin
-    // Returns: Promise<User> - created user object
     create: async (data) => {
         const response = await fetch(`${API_BASE_URL}/users`, {
-            method: 'POST',                          // HTTP POST request
-            headers: {
-                'Content-Type': 'application/json',  // Sending JSON
-            },
-            credentials: 'include',                  // Send session cookie
-            body: JSON.stringify(data),              // Convert data to JSON
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify(data),
         });
         return handleResponse(response);
     },
 };
 
-// ============================================================================
+
 // LOCATIONS API
-// Functions for managing pet adoption locations
-// ============================================================================
+
 export const locationsAPI = {
-    // Function: Get all locations
     list: async () => {
         const response = await fetch(`${API_BASE_URL}/locations`, {
-            credentials: 'include',    // Send session cookie
+            credentials: 'include',
         });
         return handleResponse(response);
     },
 
-    // Function: Create a new location
     create: async (data) => {
         const response = await fetch(`${API_BASE_URL}/locations`, {
-            method: 'POST',                          // HTTP POST request
-            headers: {
-                'Content-Type': 'application/json',  // Sending JSON
-            },
-            credentials: 'include',                  // Send session cookie
-            body: JSON.stringify(data),              // Convert data to JSON
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify(data),
         });
         return handleResponse(response);
     },
 
-    // Function: Update an existing location
     update: async (id, data) => {
         const response = await fetch(`${API_BASE_URL}/locations/${id}`, {
-            method: 'PUT',                           // HTTP PUT request
-            headers: {
-                'Content-Type': 'application/json',  // Sending JSON
-            },
-            credentials: 'include',                  // Send session cookie
-            body: JSON.stringify(data),              // Convert data to JSON
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify(data),
         });
         return handleResponse(response);
     },
 
-    // Function: Delete a location
     delete: async (id) => {
         const response = await fetch(`${API_BASE_URL}/locations/${id}`, {
-            method: 'DELETE',          // HTTP DELETE request
-            credentials: 'include',    // Send session cookie
+            method: 'DELETE',
+            credentials: 'include',
         });
         return handleResponse(response);
     },
@@ -202,69 +154,153 @@ export const locationsAPI = {
 
 // ============================================================================
 // PETS API
-// Functions for managing pets
 // ============================================================================
 export const petsAPI = {
-    // Function: Get all pets
-    // Returns: Promise<Pet[]> - array of pet objects
     list: async () => {
         const response = await fetch(`${API_BASE_URL}/pets`, {
-            credentials: 'include',    // Send session cookie
+            credentials: 'include',
         });
         return handleResponse(response);
     },
 
-    // Function: Get a single pet by ID
     get: async (id) => {
         const response = await fetch(`${API_BASE_URL}/pets/${id}`, {
-            credentials: 'include',    // Send session cookie
+            credentials: 'include',
         });
         return handleResponse(response);
     },
 
-    // Function: Create a new pet (with optional photo upload)
     create: async (formData) => {
-        // formData should be a FormData object with:
-        // - name, species, age, location_id, description
-        // - photo (optional file)
         const response = await fetch(`${API_BASE_URL}/pets`, {
-            method: 'POST',                // HTTP POST request
-            credentials: 'include',        // Send session cookie
-            body: formData,                // Send FormData directly
-            // DON'T set Content-Type header - browser sets it automatically
-            // with the correct multipart boundary
+            method: 'POST',
+            credentials: 'include',
+            body: formData,
         });
         return handleResponse(response);
     },
 
-    // Function: Update an existing pet (with optional photo upload)
     update: async (id, formData) => {
-        // formData should be a FormData object with:
-        // - name, species, age, location_id, description
-        // - photo (optional file)
         const response = await fetch(`${API_BASE_URL}/pets/${id}`, {
-            method: 'PUT',                 // HTTP PUT request
-            credentials: 'include',        // Send session cookie
-            body: formData,                // Send FormData directly
-            // DON'T set Content-Type header - browser sets it automatically
+            method: 'PUT',
+            credentials: 'include',
+            body: formData,
         });
         return handleResponse(response);
     },
 
-    // Function: Approve a pet (change status from pending to approved)
     approve: async (id) => {
         const response = await fetch(`${API_BASE_URL}/pets/${id}/approve`, {
-            method: 'PATCH',           // HTTP PATCH request (partial update)
-            credentials: 'include',    // Send session cookie
+            method: 'PATCH',
+            credentials: 'include',
         });
         return handleResponse(response);
     },
 
-    // Function: Delete a pet
     delete: async (id) => {
         const response = await fetch(`${API_BASE_URL}/pets/${id}`, {
-            method: 'DELETE',          // HTTP DELETE request
-            credentials: 'include',    // Send session cookie
+            method: 'DELETE',
+            credentials: 'include',
+        });
+        return handleResponse(response);
+    },
+};
+
+
+// APPLICATIONS API
+
+export const applicationsAPI = {
+    // Submit a new application
+    create: async (data) => {
+        const response = await fetch(`${API_BASE_URL}/applications`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify(data),
+        });
+        return handleResponse(response);
+    },
+
+    // Get all applications (admin sees all, user sees their own)
+    list: async (status = null) => {
+        const url = status
+            ? `${API_BASE_URL}/applications?status=${status}`
+            : `${API_BASE_URL}/applications`;
+        const response = await fetch(url, {
+            credentials: 'include',
+        });
+        return handleResponse(response);
+    },
+
+    // Get specific application
+    get: async (id) => {
+        const response = await fetch(`${API_BASE_URL}/applications/${id}`, {
+            credentials: 'include',
+        });
+        return handleResponse(response);
+    },
+
+    // Update application (admin only)
+    update: async (id, data) => {
+        const response = await fetch(`${API_BASE_URL}/applications/${id}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify(data),
+        });
+        return handleResponse(response);
+    },
+
+    // Get stats (admin only)
+    getStats: async () => {
+        const response = await fetch(`${API_BASE_URL}/applications/stats`, {
+            credentials: 'include',
+        });
+        return handleResponse(response);
+    },
+};
+
+
+// FAVORITES API
+
+export const favoritesAPI = {
+    // Get user's favorited pets
+    list: async () => {
+        const response = await fetch(`${API_BASE_URL}/favorites`, {
+            credentials: 'include',
+        });
+        return handleResponse(response);
+    },
+
+    // Get list of favorited pet IDs
+    listIds: async () => {
+        const response = await fetch(`${API_BASE_URL}/favorites/list-ids`, {
+            credentials: 'include',
+        });
+        return handleResponse(response);
+    },
+
+    // Add pet to favorites
+    add: async (petId) => {
+        const response = await fetch(`${API_BASE_URL}/favorites/${petId}`, {
+            method: 'POST',
+            credentials: 'include',
+        });
+        return handleResponse(response);
+    },
+
+    // Remove pet from favorites
+    remove: async (petId) => {
+        const response = await fetch(`${API_BASE_URL}/favorites/${petId}`, {
+            method: 'DELETE',
+            credentials: 'include',
+        });
+        return handleResponse(response);
+    },
+
+    // Check if pet is favorited
+    check: async (petId) => {
+        const response = await fetch(`${API_BASE_URL}/favorites/check/${petId}`, {
+            credentials: 'include',
         });
         return handleResponse(response);
     },

@@ -1,13 +1,14 @@
 // Login.jsx
 // Enhanced login page with Google Sign-In and Remember Me checkbox
 
-import React, {useState} from 'react';
-import {useNavigate, Link} from 'react-router-dom';
+import React, {useState, useEffect} from 'react';
+import {useNavigate, Link, useSearchParams} from 'react-router-dom';
 import {useAuth} from '../../context/AuthContext';
 
 export default function Login() {
     const {login} = useAuth();
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
 
     // Form state
     const [email, setEmail] = useState('');
@@ -15,6 +16,14 @@ export default function Login() {
     const [rememberMe, setRememberMe] = useState(false);
     const [errors, setErrors] = useState({});
     const [isSubmitting, setIsSubmitting] = useState(false);
+
+    // Check for OAuth error in URL
+    useEffect(() => {
+        const error = searchParams.get('error');
+        if (error === 'oauth_failed') {
+            setErrors({submit: 'Google Sign-In failed. Please try again or use email/password.'});
+        }
+    }, [searchParams]);
 
     // Validation
     const validateForm = () => {
@@ -49,7 +58,9 @@ export default function Login() {
         const result = await login(email, password, rememberMe);
 
         if (result.success) {
-            navigate('/admin/dashboard');
+            // Redirect to dashboard if admin, otherwise to pets page
+            const redirectPath = result.user?.is_admin ? '/admin/dashboard' : '/pets';
+            navigate(redirectPath);
         } else {
             setErrors({submit: result.error});
         }
@@ -60,7 +71,7 @@ export default function Login() {
     // Handle Google Sign-In - redirects to backend OAuth endpoint
     const handleGoogleSignIn = () => {
         // Redirect to backend Google OAuth endpoint
-        // The backend will redirect to Google, then back to /auth/google/callback
+        // The backend will handle the OAuth flow and redirect back to frontend
         window.location.href = 'http://localhost:8000/auth/google/login';
     };
 
@@ -92,6 +103,7 @@ export default function Login() {
                             }}
                             disabled={isSubmitting}
                             placeholder="your@email.com"
+                            data-cy="email-input"
                         />
                         {errors.email && (
                             <div className="text-red-400 text-sm mt-1">
@@ -114,7 +126,8 @@ export default function Login() {
                                 }
                             }}
                             disabled={isSubmitting}
-                            placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
+                            placeholder="••••••••"
+                            data-cy="password-input"
                         />
                         {errors.password && (
                             <div className="text-red-400 text-sm mt-1">
@@ -135,9 +148,6 @@ export default function Login() {
                             />
                             <span className="ml-2 text-sm">Remember me</span>
                         </label>
-                        <Link to="/forgot-password" className="text-sm text-[#64FFDA] hover:underline">
-                            Forgot password?
-                        </Link>
                     </div>
 
                     {/* Submit button */}
@@ -145,6 +155,7 @@ export default function Login() {
                         type="submit"
                         className="btn w-full mb-4"
                         disabled={isSubmitting}
+                        data-cy="login-button"
                     >
                         {isSubmitting ? 'Logging in...' : 'Login'}
                     </button>
@@ -165,6 +176,7 @@ export default function Login() {
                         onClick={handleGoogleSignIn}
                         className="w-full flex items-center justify-center gap-3 px-4 py-2 bg-white text-gray-800 rounded-xl font-semibold hover:bg-gray-100 transition-colors"
                         disabled={isSubmitting}
+                        data-cy="google-signin-button"
                     >
                         <svg className="w-5 h-5" viewBox="0 0 24 24">
                             <path
