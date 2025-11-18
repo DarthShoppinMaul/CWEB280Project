@@ -59,15 +59,15 @@ def seed_database():
             return  # Exit function early
 
         # Database is empty, so let's add data
-        print("🌱 Seeding database with initial data...\n")
+        print(" Seeding database with initial data...\n")
 
         # Step 1: Create default users
-        print("👤 Adding users...")
+        print(" Adding users...")
 
         # Create default admin user
         admin = m.User(
-            email="admin@petgallery.com",
-            password_hash=hash_password("admin123"),
+            email="admin@t.ca",
+            password_hash=hash_password("123456Pw"),
             display_name="Admin User",
             is_admin=True
         )
@@ -86,7 +86,7 @@ def seed_database():
         db.commit()
 
         print(f" Added 2 users")
-        print(f"   • Admin: admin@petgallery.com / admin123")
+        print(f"   • Admin: admin@t.ca / 123456Pw")
         print(f"   • User: test@t.ca / 123456Pw\n")
 
         # Step 2: Create locations (adoption centers)
@@ -97,18 +97,18 @@ def seed_database():
         locations = [
             m.Location(
                 name="Downtown Adoption Center",
-                address="123 Main St, Toronto, ON",
-                phone="(416) 555-0123"
+                address="123 Main St, Saskatoon, SK",
+                phone="(306) 555-0123"
             ),
             m.Location(
                 name="Riverside Shelter",
-                address="55 River Rd, Toronto, ON",
-                phone="(416) 555-0456"
+                address="55 River Rd, Saskatoon, SK",
+                phone="(306) 555-0456"
             ),
             m.Location(
                 name="Northside Rescue",
-                address="118 North St, Toronto, ON",
-                phone="(416) 555-0890"
+                address="118 North St, Saskatoon, SK",
+                phone="(306) 555-0890"
             ),
         ]
 
@@ -213,8 +213,8 @@ def seed_database():
         # Count pending pets (filter where status == 'pending')
         print(f"  • {len([p for p in pets if p.status == 'pending'])} pending pets")
         print("\nLogin credentials:")
-        print("  👤 Admin: admin@petgallery.com / admin123")
-        print("  👤 User: test@t.ca / 123456Pw")
+        print("   Admin: admin@t.ca / 123456Pw")
+        print("   User: test@t.ca / 123456Pw")
         print("\nYou can now start your backend:")
         print("  uvicorn app.main:app --reload")
 
