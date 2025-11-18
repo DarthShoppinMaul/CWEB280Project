@@ -1,0 +1,52 @@
+{
+  "testPets": [
+    {
+      "name": "Buddy",
+      "species": "Golden Retriever",
+      "age": 3,
+      "description": "Friendly and energetic dog, great with kids"
+    },
+    {
+      "name": "Whiskers",
+      "species": "Tabby Cat",
+      "age": 2,
+      "description": "Independent but affectionate cat"
+    },
+    {
+      "name": "Max",
+      "species": "German Shepherd",
+      "age": 5,
+      "description": "Loyal and protective, well-trained"
+    }
+  ],
+  "testLocations": [
+    {
+      "name": "Downtown Animal Shelter",
+      "address": "123 Main St, Toronto, ON",
+      "phone": "(416) 555-0123"
+    },
+    {
+      "name": "Eastside Pet Rescue",
+      "address": "456 East Ave, Toronto, ON",
+      "phone": "(416) 555-0456"
+    }
+  ],
+  "validationTestCases": {
+    "pets": {
+      "invalidNames": ["", "A", " "],
+      "invalidSpecies": ["", " "],
+      "invalidAges": [-1, 31, "abc", ""],
+      "validAges": [0, 1, 15, 30]
+    },
+    "locations": {
+      "invalidNames": ["", "AB", " "],
+      "invalidAddresses": ["", " "],
+      "invalidPhones": ["abc123", "###", "!@#$%"],
+      "validPhones": ["(416) 555-0123", "416-555-0123", "416 555 0123", "4165550123"]
+    }
+  },
+  "demoCredentials": {
+    "email": "test@t.ca",
+    "password": "123456Pw"
+  }
+}

@@ -1,0 +1,157 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+    color-scheme: dark;
+}
+
+body {
+    @apply bg-[#0A192F] text-[#E6F1FF];
+}
+
+/* handy utilities for your UI (matches your navy dark theme) */
+.container-narrow {
+    @apply max-w-[1200px] mx-auto px-6 py-6;
+}
+
+.panel {
+    @apply bg-[#112240] border border-[#1b355e] rounded-[16px] p-5;
+}
+
+.btn-sm {
+    @apply text-sm px-3 py-1.5 rounded-lg;
+}
+
+.badge {
+    @apply inline-block bg-[#32506e] text-[#E6F1FF] rounded-full px-3 py-1 text-xs;
+}
+
+.btn {
+    @apply inline-block rounded-xl font-semibold px-4 py-2 bg-[#64FFDA] text-[#081424];
+}
+
+.btn-secondary {
+    @apply inline-block rounded-xl font-semibold px-4 py-2 bg-[#233554] text-[#E6F1FF];
+}
+
+.btn-danger {
+    @apply inline-block rounded-xl font-semibold px-4 py-2 bg-[#FF6B6B] text-[#0b1222];
+}
+
+.input, .textarea {
+    @apply w-full bg-[#143058] text-[#E6F1FF] border border-[#3a5a86] rounded-xl px-3 py-2 outline-none;
+}
+
+.textarea {
+    @apply min-h-[120px] resize-y;
+}
+
+.grid-pets {
+    @apply grid gap-5 sm:grid-cols-2 lg:grid-cols-3;
+}
+
+.card {
+    @apply bg-[#112240] border border-[#1b355e] rounded-[16px] overflow-hidden flex flex-col min-h-[360px];
+}
+
+.card-img {
+    @apply h-[180px] bg-[#152e56] border-b border-[#1b355e] bg-cover bg-center;
+}
+
+.card-body {
+    @apply p-4 flex flex-col gap-2 flex-1;
+}
+
+.meta {
+    @apply text-[#B6C6DA] text-sm;
+}
+
+.pill {
+    @apply inline-block bg-[#233554] text-[#64FFDA] rounded-full px-3 py-1 text-xs max-w-full truncate;
+}
+
+.desc {
+    @apply text-[#B6C6DA] text-sm leading-tight line-clamp-3;
+}
+
+.card-actions {
+    @apply mt-auto flex justify-end pt-1;
+}
+
+.row-card {
+    @apply bg-[#112240] border border-[#1b355e] rounded-xl p-3 items-center;
+    display: grid;
+    grid-template-columns: 1fr 72px minmax(220px, 340px) 120px 1fr;
+    gap: 12px;
+}
+
+.col-title {
+    @apply truncate font-medium;
+}
+
+.col-age {
+    @apply text-center text-[#B6C6DA];
+}
+
+.col-location {
+    @apply truncate;
+}
+
+.col-status {
+    @apply flex items-center;
+}
+
+.col-actions {
+    @apply flex justify-end items-center gap-2;
+}
+
+
+@media (max-width: 900px) {
+    .row-card {
+        grid-template-columns: 1fr 56px 1fr;
+        grid-template-areas:
+      "title age actions"
+      "location location status";
+    }
+
+    .col-title {
+        grid-area: title;
+    }
+
+    .col-age {
+        grid-area: age;
+    }
+
+    .col-actions {
+        grid-area: actions;
+    }
+
+    .col-location {
+        grid-area: location;
+    }
+
+    .col-status {
+        grid-area: status;
+    }
+}
+
+.navbar {
+    @apply sticky top-0 z-50 bg-[#112240] border-b border-[#1b355e] flex items-center justify-between px-6 py-3;
+}
+
+.nav-left {
+    @apply font-semibold text-lg;
+}
+
+.nav-right a {
+    @apply ml-4;
+}
+
+.nav-active {
+    @apply text-[#64FFDA];
+}
+
+.toast {
+    @apply fixed right-4 bottom-4 bg-[#0f2446] border border-[#1b355e] rounded-lg px-3 py-2 shadow-lg hidden;
+}

@@ -1,0 +1,13 @@
+python-multipart
+fastapi
+uvicorn
+dotenv
+pytest
+httpx
+sqlalchemy
+uvicorn[standard]
+pydantic[email]
+python-dotenv
+bcrypt
+authlib
+itsdangerous
