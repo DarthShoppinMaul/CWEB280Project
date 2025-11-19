@@ -4,6 +4,7 @@
 import React, {useEffect, useState} from 'react';
 import {useParams, useNavigate} from 'react-router-dom';
 import {useAuth} from '../../context/AuthContext';
+import {applicationsAPI, API_BASE_URL} from '../../services/api';
 
 export default function ApplicationReview() {
     const {id} = useParams();
@@ -15,6 +16,7 @@ export default function ApplicationReview() {
     const [updatePetStatus, setUpdatePetStatus] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
     useEffect(() => {
         if (!user?.is_admin) {
@@ -22,55 +24,49 @@ export default function ApplicationReview() {
             return;
         }
 
-        // Simulate API call
-        setTimeout(() => {
-            setApplication({
-                application_id: parseInt(id),
-                user: {
-                    user_id: 5,
-                    display_name: 'John Smith',
-                    email: 'john.smith@email.com',
-                    phone: '(306) 555-0123'
-                },
-                pet: {
-                    pet_id: 1,
-                    name: 'Max',
-                    species: 'Dog',
-                    breed: 'Golden Retriever',
-                    age: 3,
-                    adoption_status: 'available',
-                    photo_url: null
-                },
-                status: 'pending',
-                application_message: 'I have always wanted a Golden Retriever. I have a large backyard with a secure fence, and I work from home so I can provide constant companionship. I have experience with dogs and understand the time and financial commitment required. Max would be joining a loving home where he would get plenty of exercise, training, and affection.',
-                contact_phone: '(306) 555-0123',
-                living_situation: 'house',
-                has_other_pets: false,
-                other_pets_details: '',
-                application_date: '2024-11-01',
-                admin_notes: ''
-            });
-
-            setAdminNotes('');
-            setLoading(false);
-        }, 500);
+        loadApplication();
     }, [id, user, navigate]);
 
+    const loadApplication = async () => {
+        try {
+            setLoading(true);
+            setError(null);
+
+            // Fetch application details from backend
+            const applicationData = await applicationsAPI.get(parseInt(id));
+            setApplication(applicationData);
+            setAdminNotes(applicationData.admin_notes || '');
+        } catch (err) {
+            console.error('Error loading application:', err);
+            setError('Failed to load application. Please try again.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
     const handleApprove = async () => {
-        if (!confirm(`Approve application for ${application.pet.name}?`)) {
+        if (!confirm(`Approve application for ${application.pet_name}?`)) {
             return;
         }
 
         setIsSubmitting(true);
 
-        // Simulate API call
-        setTimeout(() => {
-            console.log('Approved application', id);
-            console.log('Admin notes:', adminNotes);
-            console.log('Update pet status:', updatePetStatus);
+        try {
+            // Update application status to approved
+            await applicationsAPI.update(parseInt(id), {
+                status: 'approved',
+                admin_notes: adminNotes
+            });
+
             alert('Application approved successfully!');
             navigate('/admin/dashboard');
-        }, 1000);
+        } catch (error) {
+            console.error('Error approving application:', error);
+            const errorMessage = error.response?.data?.detail || 'Failed to approve application. Please try again.';
+            setError(errorMessage);
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     const handleReject = async () => {
@@ -79,30 +75,47 @@ export default function ApplicationReview() {
             return;
         }
 
-        if (!confirm(`Reject application for ${application.pet.name}?`)) {
+        if (!confirm(`Reject application for ${application.pet_name}?`)) {
             return;
         }
 
         setIsSubmitting(true);
 
-        // Simulate API call
-        setTimeout(() => {
-            console.log('Rejected application', id);
-            console.log('Admin notes:', adminNotes);
+        try {
+            // Update application status to rejected
+            await applicationsAPI.update(parseInt(id), {
+                status: 'rejected',
+                admin_notes: adminNotes
+            });
+
             alert('Application rejected.');
             navigate('/admin/dashboard');
-        }, 1000);
+        } catch (error) {
+            console.error('Error rejecting application:', error);
+            const errorMessage = error.response?.data?.detail || 'Failed to reject application. Please try again.';
+            setError(errorMessage);
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     const handleSaveNotes = async () => {
         setIsSubmitting(true);
 
-        // Simulate API call
-        setTimeout(() => {
-            console.log('Saved notes:', adminNotes);
+        try {
+            // Save admin notes without changing status
+            await applicationsAPI.update(parseInt(id), {
+                admin_notes: adminNotes
+            });
+
             alert('Notes saved successfully!');
+        } catch (error) {
+            console.error('Error saving notes:', error);
+            const errorMessage = error.response?.data?.detail || 'Failed to save notes. Please try again.';
+            setError(errorMessage);
+        } finally {
             setIsSubmitting(false);
-        }, 500);
+        }
     };
 
     const formatDate = (dateString) => {
@@ -132,6 +145,19 @@ export default function ApplicationReview() {
         return (
             <div className="container-narrow">
                 <div className="text-center py-8">Loading application...</div>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="container-narrow">
+                <div className="text-center py-8">
+                    <div className="text-red-400 mb-4">{error}</div>
+                    <button onClick={loadApplication} className="btn">
+                        Try Again
+                    </button>
+                </div>
             </div>
         );
     }
@@ -188,21 +214,21 @@ export default function ApplicationReview() {
                             <div
                                 className="w-24 h-24 bg-[#152e56] rounded-xl bg-cover bg-center flex-shrink-0"
                                 style={{
-                                    backgroundImage: application.pet.photo_url
-                                        ? `url(http://localhost:8000/${application.pet.photo_url})`
+                                    backgroundImage: application.pet_photo_url
+                                        ? `url(${API_BASE_URL}/${application.pet_photo_url})`
                                         : undefined
                                 }}
                             />
                             <div>
-                                <h3 className="text-lg font-semibold mb-1">{application.pet.name}</h3>
+                                <h3 className="text-lg font-semibold mb-1">{application.pet_name}</h3>
                                 <div className="text-[#B6C6DA] text-sm mb-2">
-                                    {application.pet.species} • {application.pet.breed} • {application.pet.age} years old
+                                    {application.pet_species} • {application.pet_age} years old
                                 </div>
-                                {getStatusBadge(application.pet.adoption_status)}
+                                {getStatusBadge('available')}
                             </div>
                         </div>
                         <button
-                            onClick={() => navigate(`/pet/${application.pet.pet_id}`)}
+                            onClick={() => navigate(`/pet/${application.pet_id}`)}
                             className="btn-secondary w-full mt-4 text-sm"
                         >
                             View Full Pet Profile
@@ -215,11 +241,11 @@ export default function ApplicationReview() {
                         <div className="space-y-3">
                             <div>
                                 <div className="text-sm text-[#B6C6DA] mb-1">Name</div>
-                                <div className="font-medium">{application.user.display_name}</div>
+                                <div className="font-medium">{application.user_name}</div>
                             </div>
                             <div>
                                 <div className="text-sm text-[#B6C6DA] mb-1">Email</div>
-                                <div className="font-medium">{application.user.email}</div>
+                                <div className="font-medium">{application.user_email}</div>
                             </div>
                             <div>
                                 <div className="text-sm text-[#B6C6DA] mb-1">Phone</div>
@@ -277,23 +303,6 @@ export default function ApplicationReview() {
                     {application.status === 'pending' && (
                         <div className="panel">
                             <h2 className="text-xl font-semibold mb-4">Review Actions</h2>
-
-                            {/* Update Pet Status Option */}
-                            <label className="flex items-start cursor-pointer mb-4 p-3 bg-[#0A192F] rounded-xl">
-                                <input
-                                    type="checkbox"
-                                    checked={updatePetStatus}
-                                    onChange={(e) => setUpdatePetStatus(e.target.checked)}
-                                    className="w-4 h-4 mt-1 rounded border-[#3a5a86] bg-[#143058] text-[#64FFDA] focus:ring-2 focus:ring-[#64FFDA] focus:ring-offset-0"
-                                    disabled={isSubmitting}
-                                />
-                                <span className="ml-3">
-                                    <div className="font-medium mb-1">Update pet status to "Pending"</div>
-                                    <div className="text-sm text-[#B6C6DA]">
-                                        Mark {application.pet.name} as pending adoption when approving
-                                    </div>
-                                </span>
-                            </label>
 
                             <div className="space-y-3">
                                 <button

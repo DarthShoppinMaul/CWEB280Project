@@ -5,16 +5,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="6b00ffbd-7a02-4a67-b8ea-3de55b5fc5ba" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/../pythonapi/app/api/applications_endpoints.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../pythonapi/app/api/favorites_endpoints.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../pythonapi/app/schemas/schemas_application.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../pythonapi/app/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/../pythonapi/app/main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../pythonapi/app/schemas/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/../pythonapi/app/schemas/models.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../pythonapi/app/seed.py" beforeDir="false" afterPath="$PROJECT_DIR$/../pythonapi/app/seed.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/react/pages/Home.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/react/pages/Home.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/react/pages/Login.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/react/pages/Login.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/services/api.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/services/api.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/react/App.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/react/App.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/react/pages/AdoptionApplicationForm.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/react/pages/AdoptionApplicationForm.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/react/pages/MyApplications.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/react/pages/MyApplications.jsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

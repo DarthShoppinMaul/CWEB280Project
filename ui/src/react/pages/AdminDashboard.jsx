@@ -4,6 +4,7 @@
 import React, {useEffect, useState} from 'react';
 import {useNavigate} from 'react-router-dom';
 import {useAuth} from '../../context/AuthContext';
+import {applicationsAPI, petsAPI, locationsAPI, usersAPI, API_BASE_URL} from '../../services/api';
 
 export default function AdminDashboard() {
     const {user} = useAuth();
@@ -17,6 +18,7 @@ export default function AdminDashboard() {
     });
     const [pendingApplications, setPendingApplications] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
     useEffect(() => {
         if (!user?.is_admin) {
@@ -24,101 +26,63 @@ export default function AdminDashboard() {
             return;
         }
 
-        // Simulate API call
-        setTimeout(() => {
-            setStats({
-                totalPets: 15,
-                totalLocations: 3,
-                totalUsers: 42,
-                pendingApplications: 5
-            });
+        loadDashboardData();
+    }, [user, navigate]);
 
-            setPendingApplications([
-                {
-                    application_id: 1,
-                    user: {
-                        display_name: 'John Smith',
-                        email: 'john.smith@email.com'
-                    },
-                    pet: {
-                        pet_id: 1,
-                        name: 'Max',
-                        species: 'Dog',
-                        breed: 'Golden Retriever',
-                        photo_url: null
-                    },
-                    application_date: '2024-11-05',
-                    days_waiting: 3
-                },
-                {
-                    application_id: 2,
-                    user: {
-                        display_name: 'Sarah Johnson',
-                        email: 'sarah.j@email.com'
-                    },
-                    pet: {
-                        pet_id: 2,
-                        name: 'Luna',
-                        species: 'Cat',
-                        breed: 'Siamese',
-                        photo_url: null
-                    },
-                    application_date: '2024-11-04',
-                    days_waiting: 4
-                },
-                {
-                    application_id: 3,
-                    user: {
-                        display_name: 'Michael Chen',
-                        email: 'mchen@email.com'
-                    },
-                    pet: {
-                        pet_id: 5,
-                        name: 'Rocky',
-                        species: 'Dog',
-                        breed: 'German Shepherd',
-                        photo_url: null
-                    },
-                    application_date: '2024-11-03',
-                    days_waiting: 5
-                },
-                {
-                    application_id: 4,
-                    user: {
-                        display_name: 'Emma Wilson',
-                        email: 'ewilson@email.com'
-                    },
-                    pet: {
-                        pet_id: 4,
-                        name: 'Bella',
-                        species: 'Cat',
-                        breed: 'Persian',
-                        photo_url: null
-                    },
-                    application_date: '2024-11-02',
-                    days_waiting: 6
-                },
-                {
-                    application_id: 5,
-                    user: {
-                        display_name: 'David Brown',
-                        email: 'dbrown@email.com'
-                    },
-                    pet: {
-                        pet_id: 1,
-                        name: 'Max',
-                        species: 'Dog',
-                        breed: 'Golden Retriever',
-                        photo_url: null
-                    },
-                    application_date: '2024-11-01',
-                    days_waiting: 7
-                }
+    const loadDashboardData = async () => {
+        try {
+            setLoading(true);
+            setError(null);
+
+            // Fetch data in parallel for better performance
+            const [
+                applicationsData,
+                petsData,
+                locationsData,
+                usersData,
+                statsData
+            ] = await Promise.all([
+                applicationsAPI.list('pending'), // Only pending applications
+                petsAPI.list(),
+                locationsAPI.list(),
+                usersAPI.list(),
+                applicationsAPI.getStats()
             ]);
 
+            // Set statistics from real data
+            setStats({
+                totalPets: petsData.length,
+                totalLocations: locationsData.length,
+                totalUsers: usersData.length,
+                pendingApplications: statsData.pending || 0
+            });
+
+            // Process pending applications to add days waiting calculation
+            const processedApplications = applicationsData.map(app => {
+                const applicationDate = new Date(app.application_date);
+                const today = new Date();
+                const diffTime = Math.abs(today - applicationDate);
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+                return {
+                    ...app,
+                    days_waiting: diffDays
+                };
+            });
+
+            // Sort by days waiting (longest waiting first) and take top 5
+            const sortedApplications = processedApplications
+                .sort((a, b) => b.days_waiting - a.days_waiting)
+                .slice(0, 5);
+
+            setPendingApplications(sortedApplications);
+        } catch (err) {
+            console.error('Error loading dashboard data:', err);
+            setError('Failed to load dashboard data. Please try again.');
+        } finally {
             setLoading(false);
-        }, 500);
-    }, [user, navigate]);
+        }
+    };
 
     const formatDate = (dateString) => {
         const date = new Date(dateString);
@@ -133,6 +97,19 @@ export default function AdminDashboard() {
         return (
             <div className="container-narrow">
                 <div className="text-center py-8">Loading dashboard...</div>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="container-narrow">
+                <div className="text-center py-8">
+                    <div className="text-red-400 mb-4">{error}</div>
+                    <button onClick={loadDashboardData} className="btn">
+                        Try Again
+                    </button>
+                </div>
             </div>
         );
     }
@@ -164,13 +141,12 @@ export default function AdminDashboard() {
             {/* Pending Applications Section */}
             <div className="mb-8">
                 <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-2xl font-semibold">Pending Applications</h2>
-                    <button
-                        onClick={() => navigate('/admin/applications')}
-                        className="btn-secondary text-sm"
-                    >
-                        View All Applications
-                    </button>
+                    <h2 className="text-2xl font-semibold">Recent Pending Applications</h2>
+                    {stats.pendingApplications > 5 && (
+                        <div className="text-sm text-[#B6C6DA]">
+                            Showing 5 most recent • {stats.pendingApplications} total pending
+                        </div>
+                    )}
                 </div>
 
                 {pendingApplications.length === 0 ? (
@@ -189,8 +165,8 @@ export default function AdminDashboard() {
                                     <div
                                         className="w-20 h-20 bg-[#152e56] rounded-xl bg-cover bg-center flex-shrink-0"
                                         style={{
-                                            backgroundImage: app.pet.photo_url
-                                                ? `url(http://localhost:8000/${app.pet.photo_url})`
+                                            backgroundImage: app.pet_photo_url
+                                                ? `url(${API_BASE_URL}/${app.pet_photo_url})`
                                                 : undefined
                                         }}
                                     />
@@ -200,12 +176,12 @@ export default function AdminDashboard() {
                                         <div className="flex items-start justify-between gap-4 mb-2">
                                             <div>
                                                 <h3 className="font-semibold text-lg mb-1">
-                                                    {app.user.display_name}
+                                                    {app.user_name}
                                                     <span className="text-[#B6C6DA] font-normal"> applied for </span>
-                                                    {app.pet.name}
+                                                    {app.pet_name}
                                                 </h3>
                                                 <div className="text-sm text-[#B6C6DA]">
-                                                    {app.pet.species} • {app.pet.breed}
+                                                    {app.pet_species} • {app.pet_age} years old
                                                 </div>
                                             </div>
                                             <div className="text-right flex-shrink-0">
@@ -223,7 +199,7 @@ export default function AdminDashboard() {
                                         </div>
 
                                         <div className="text-sm text-[#B6C6DA] mb-3">
-                                            {app.user.email}
+                                            {app.user_email}
                                         </div>
 
                                         <button
@@ -266,7 +242,7 @@ export default function AdminDashboard() {
                     </button>
 
                     <button
-                        onClick={() => navigate('/admin/pets')}
+                        onClick={() => navigate('/add-pet')}
                         className="panel hover:border-[#64FFDA] transition-colors text-center py-8"
                     >
                         <svg className="w-12 h-12 mx-auto mb-3 text-[#64FFDA]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -274,36 +250,6 @@ export default function AdminDashboard() {
                         </svg>
                         <div className="font-semibold text-lg">Manage All Pets</div>
                     </button>
-                </div>
-            </div>
-
-            {/* Recent Activity (Optional - can be commented out) */}
-            <div>
-                <h2 className="text-2xl font-semibold mb-4">Recent Activity</h2>
-                <div className="panel">
-                    <div className="space-y-4">
-                        <div className="flex items-center gap-3 pb-4 border-b border-[#1b355e]">
-                            <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-                            <div className="flex-1">
-                                <div className="text-sm">New user registration</div>
-                                <div className="text-xs text-[#B6C6DA]">Emma Wilson joined • 2 hours ago</div>
-                            </div>
-                        </div>
-                        <div className="flex items-center gap-3 pb-4 border-b border-[#1b355e]">
-                            <div className="w-2 h-2 bg-[#64FFDA] rounded-full"></div>
-                            <div className="flex-1">
-                                <div className="text-sm">Pet added</div>
-                                <div className="text-xs text-[#B6C6DA]">New dog "Buddy" added to Downtown Shelter • 5 hours ago</div>
-                            </div>
-                        </div>
-                        <div className="flex items-center gap-3">
-                            <div className="w-2 h-2 bg-yellow-400 rounded-full"></div>
-                            <div className="flex-1">
-                                <div className="text-sm">New adoption application</div>
-                                <div className="text-xs text-[#B6C6DA]">Sarah Johnson applied for Luna • 1 day ago</div>
-                            </div>
-                        </div>
-                    </div>
                 </div>
             </div>
         </div>

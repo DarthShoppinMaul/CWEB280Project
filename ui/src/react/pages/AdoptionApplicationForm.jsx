@@ -4,6 +4,7 @@
 import React, {useEffect, useState} from 'react';
 import {useParams, useNavigate} from 'react-router-dom';
 import {useAuth} from '../../context/AuthContext';
+import {applicationsAPI} from '../../services/api';
 
 export default function AdoptionApplicationForm() {
     const {petId} = useParams();
@@ -90,12 +91,30 @@ export default function AdoptionApplicationForm() {
 
         setIsSubmitting(true);
 
-        // Simulate API call
-        setTimeout(() => {
-            console.log('Application submitted:', formData);
+        try {
+            // Prepare application data
+            const applicationData = {
+                pet_id: parseInt(petId),
+                application_message: formData.applicationMessage,
+                contact_phone: formData.contactPhone,
+                living_situation: formData.livingSituation,
+                has_other_pets: formData.hasOtherPets,
+                other_pets_details: formData.hasOtherPets ? formData.otherPetsDetails : null
+            };
+
+            // Submit application to backend
+            await applicationsAPI.create(applicationData);
+
+            // Show success and redirect
             alert('Application submitted successfully!');
             navigate('/my-applications');
-        }, 1000);
+        } catch (error) {
+            console.error('Error submitting application:', error);
+            const errorMessage = error.response?.data?.detail || 'Failed to submit application. Please try again.';
+            setErrors({submit: errorMessage});
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     if (loading) {
@@ -150,6 +169,13 @@ export default function AdoptionApplicationForm() {
 
             {/* Application Form */}
             <div className="panel">
+                {/* Submit Error */}
+                {errors.submit && (
+                    <div className="mb-4 p-3 bg-red-900/30 border border-red-500 text-red-400 rounded-xl">
+                        {errors.submit}
+                    </div>
+                )}
+
                 <form onSubmit={handleSubmit}>
                     {/* Why adopt */}
                     <div className="mb-6">

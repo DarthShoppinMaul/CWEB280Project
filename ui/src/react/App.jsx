@@ -48,13 +48,15 @@ export default function App() {
                     {/* Links only visible when user is logged in */}
                     {isAuthenticated && (
                         <>
-                            {/* My Applications - regular users */}
-                            <NavLink
-                                to="/my-applications"
-                                className={({isActive}) => isActive ? 'nav-active' : ''}
-                            >
-                                My Applications
-                            </NavLink>
+                            {/* My Applications - regular users only (admins use dashboard) */}
+                            {!user?.is_admin && (
+                                <NavLink
+                                    to="/my-applications"
+                                    className={({isActive}) => isActive ? 'nav-active' : ''}
+                                >
+                                    My Applications
+                                </NavLink>
+                            )}
 
                             {/* Profile link - all authenticated users */}
                             <NavLink

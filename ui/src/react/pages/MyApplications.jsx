@@ -1,9 +1,11 @@
 // MyApplications.jsx
 // Page for users to view their submitted adoption applications
+// Admins are redirected to the dashboard instead
 
 import React, {useEffect, useState} from 'react';
 import {useNavigate} from 'react-router-dom';
 import {useAuth} from '../../context/AuthContext';
+import {applicationsAPI} from '../../services/api';
 
 export default function MyApplications() {
     const {user} = useAuth();
@@ -12,6 +14,7 @@ export default function MyApplications() {
     const [applications, setApplications] = useState([]);
     const [filter, setFilter] = useState('all');
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
     useEffect(() => {
         if (!user) {
@@ -19,68 +22,30 @@ export default function MyApplications() {
             return;
         }
 
-        // Simulate API call
-        setTimeout(() => {
-            setApplications([
-                {
-                    application_id: 1,
-                    pet: {
-                        pet_id: 1,
-                        name: 'Max',
-                        species: 'Dog',
-                        breed: 'Golden Retriever',
-                        age: 3,
-                        photo_url: null
-                    },
-                    status: 'pending',
-                    application_date: '2024-11-01',
-                    application_message: 'I have a large backyard and love to go on walks.',
-                    contact_phone: '(306) 555-0123',
-                    living_situation: 'house',
-                    has_other_pets: false
-                },
-                {
-                    application_id: 2,
-                    pet: {
-                        pet_id: 3,
-                        name: 'Charlie',
-                        species: 'Dog',
-                        breed: 'Beagle',
-                        age: 5,
-                        photo_url: null
-                    },
-                    status: 'approved',
-                    application_date: '2024-10-15',
-                    reviewed_at: '2024-10-18',
-                    admin_notes: 'Great match! Please contact us to schedule a meet-and-greet.',
-                    application_message: 'I work from home and can provide constant companionship.',
-                    contact_phone: '(306) 555-0123',
-                    living_situation: 'apartment',
-                    has_other_pets: true
-                },
-                {
-                    application_id: 3,
-                    pet: {
-                        pet_id: 5,
-                        name: 'Rocky',
-                        species: 'Dog',
-                        breed: 'German Shepherd',
-                        age: 6,
-                        photo_url: null
-                    },
-                    status: 'rejected',
-                    application_date: '2024-09-20',
-                    reviewed_at: '2024-09-22',
-                    admin_notes: 'Unfortunately, this pet needs an experienced owner with a larger space.',
-                    application_message: 'I live in a small apartment but really love German Shepherds.',
-                    contact_phone: '(306) 555-0123',
-                    living_situation: 'apartment',
-                    has_other_pets: false
-                }
-            ]);
-            setLoading(false);
-        }, 500);
+        // Redirect admins to dashboard - they don't need to see "My Applications"
+        if (user.is_admin) {
+            navigate('/admin/dashboard');
+            return;
+        }
+
+        loadApplications();
     }, [user, navigate]);
+
+    const loadApplications = async () => {
+        try {
+            setLoading(true);
+            setError(null);
+
+            // Fetch user's applications from backend
+            const data = await applicationsAPI.list();
+            setApplications(data);
+        } catch (err) {
+            console.error('Error loading applications:', err);
+            setError('Failed to load applications. Please try again.');
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const getStatusBadge = (status) => {
         const styles = {
@@ -138,6 +103,19 @@ export default function MyApplications() {
         return (
             <div className="container-narrow">
                 <div className="text-center py-8">Loading applications...</div>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="container-narrow">
+                <div className="text-center py-8">
+                    <div className="text-red-400 mb-4">{error}</div>
+                    <button onClick={loadApplications} className="btn">
+                        Try Again
+                    </button>
+                </div>
             </div>
         );
     }
@@ -219,8 +197,8 @@ export default function MyApplications() {
                                 <div
                                     className="w-32 h-32 bg-[#152e56] rounded-xl bg-cover bg-center flex-shrink-0"
                                     style={{
-                                        backgroundImage: app.pet.photo_url
-                                            ? `url(http://localhost:8000/${app.pet.photo_url})`
+                                        backgroundImage: app.pet_photo_url
+                                            ? `url(http://localhost:8000/${app.pet_photo_url})`
                                             : undefined
                                     }}
                                 />
@@ -229,9 +207,9 @@ export default function MyApplications() {
                                 <div className="flex-1 min-w-0">
                                     <div className="flex items-start justify-between gap-4 mb-3">
                                         <div>
-                                            <h3 className="text-xl font-semibold mb-1">{app.pet.name}</h3>
+                                            <h3 className="text-xl font-semibold mb-1">{app.pet_name}</h3>
                                             <div className="text-[#B6C6DA] text-sm">
-                                                {app.pet.species} • {app.pet.breed} • {app.pet.age} years old
+                                                {app.pet_species} • {app.pet_age} years old
                                             </div>
                                         </div>
                                         {getStatusBadge(app.status)}
