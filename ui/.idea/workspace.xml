@@ -5,11 +5,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="6b00ffbd-7a02-4a67-b8ea-3de55b5fc5ba" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/cypress/e2e/adminreview.cy.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/cypress/e2e/usermanagement.cy.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/main.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/react/pages/AdminDashboard.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/react/pages/AdminDashboard.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/react/pages/Login.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/react/pages/Login.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/react/pages/Registration.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/react/pages/Registration.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cypress/e2e/auth.cy.js" beforeDir="false" afterPath="$PROJECT_DIR$/cypress/e2e/auth.cy.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cypress/support/commands.js" beforeDir="false" afterPath="$PROJECT_DIR$/cypress/support/commands.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
