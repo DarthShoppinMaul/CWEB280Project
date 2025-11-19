@@ -1,10 +1,19 @@
 # app/config.py
 from dotenv import load_dotenv
 import os
+from pathlib import Path
+
+# Get the directory where this config file is located
+config_dir = Path(__file__).resolve().parent
+
+# Load environment variables from googleauth.env file
+env_file = config_dir / 'googleauth.env'
+if not env_file.exists():
+    env_file = config_dir.parent / 'googleauth.env'
 
 # Load environment variables from a .env file into os.environ
 # IMPORTANT: Never commit .env files to version control (they can contain secrets).
-load_dotenv('googleauth.env')
+load_dotenv(env_file)
 
 # -----------------------------
 # GLOBAL CONFIG VARIABLES
@@ -22,7 +31,6 @@ MY_SECRET_KEY = os.getenv(
 
 # Database connection string
 # Default at SQLite file "ems.db" inside app/ folder
-# Can be overridden in .env (e.g., PostgreSQL, MySQL)
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./ems.db")
 
 

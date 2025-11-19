@@ -299,6 +299,15 @@ async def google_login(request: Request):
     # Generate the redirect URI for Google OAuth callback
     redirect_uri = config.GOOGLE_REDIRECT_URI
 
+    # Re-register Google OAuth with current config values (fix for empty values at startup)
+    oauth.register(
+        name='google',
+        client_id=config.GOOGLE_CLIENT_ID,
+        client_secret=config.GOOGLE_CLIENT_SECRET,
+        server_metadata_url='https://accounts.google.com/.well-known/openid-configuration',
+        client_kwargs={'scope': 'openid email profile'}
+    )
+
     # Redirect user to Google's OAuth consent screen
     return await oauth.google.authorize_redirect(request, redirect_uri)
 
@@ -322,6 +331,15 @@ async def google_callback(request: Request, response: Response, db: Session = De
         Redirect to frontend application with user logged in
     """
     try:
+        # Re-register Google OAuth with current config values (fix for empty values at startup)
+        oauth.register(
+            name='google',
+            client_id=config.GOOGLE_CLIENT_ID,
+            client_secret=config.GOOGLE_CLIENT_SECRET,
+            server_metadata_url='https://accounts.google.com/.well-known/openid-configuration',
+            client_kwargs={'scope': 'openid email profile'}
+        )
+
         # Exchange authorization code for access token and get user info
         token = await oauth.google.authorize_access_token(request)
         user_info = token.get('userinfo')
@@ -370,3 +388,5 @@ async def google_callback(request: Request, response: Response, db: Session = De
         print(f"Google OAuth error: {str(e)}")
         # Redirect to login page with error
         return RedirectResponse(url="http://localhost:5173/login?error=oauth_failed")
+
+

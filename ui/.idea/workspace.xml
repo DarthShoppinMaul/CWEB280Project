@@ -6,9 +6,6 @@
   <component name="ChangeListManager">
     <list default="true" id="6b00ffbd-7a02-4a67-b8ea-3de55b5fc5ba" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/react/App.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/react/App.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/react/pages/AdoptionApplicationForm.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/react/pages/AdoptionApplicationForm.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/react/pages/MyApplications.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/react/pages/MyApplications.jsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
