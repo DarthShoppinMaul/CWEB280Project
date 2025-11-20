@@ -39,7 +39,7 @@ def seed_database():
         existing_pets = db.query(m.Pet).count()
 
         if existing_users > 0 or existing_locations > 0 or existing_pets > 0:
-            print(f"✓ Database already has data:")
+            print(f"✓Database already has data:")
             print(f"   • {existing_users} users")
             print(f"   • {existing_locations} locations")
             print(f"   • {existing_pets} pets")
@@ -52,14 +52,14 @@ def seed_database():
         print(" Adding users...")
 
         admin = m.User(
-            email="admin@t.ca",
+            email="test@t.ca",
             password_hash=hash_password("123456Pw"),
             display_name="Admin User",
             is_admin=True
         )
 
         regular_user = m.User(
-            email="test@t.ca",
+            email="ebasotest@gmail.com",
             password_hash=hash_password("123456Pw"),
             display_name="Regular User",
             is_admin=False
@@ -77,10 +77,10 @@ def seed_database():
         db.add(test_user2)
         db.commit()
 
-        print(f"✓ Added 3 users")
-        print(f"   • Admin: admin@t.ca / 123456Pw")
-        print(f"   • User: test@t.ca / 123456Pw")
-        print(f"   • User: john@t.ca / 123456Pw\n")
+        print(f" Added 3 users")
+        print(f"   Admin: test@t.ca / 123456Pw")
+        print(f"   User: ebasotest@gmail.com / 123456Pw")
+        print(f"   User: john@t.ca / 123456Pw\n")
 
         # Step 2: Create locations
         print(" Adding locations...")
@@ -199,7 +199,7 @@ def seed_database():
         for pet in pets:
             db.refresh(pet)
 
-        print(f"✓ Added {len(pets)} pets\n")
+        print(f" Added {len(pets)} pets\n")
 
         # Step 4: Create sample applications
         print(" Adding sample applications...")
@@ -241,10 +241,10 @@ def seed_database():
 
         db.commit()
 
-        print(f"✓ Added {len(applications)} sample applications\n")
+        print(f"Added {len(applications)} sample applications\n")
 
         # Step 5: Create sample favorites
-        print("❤️  Adding sample favorites...")
+        print("  Adding sample favorites...")
 
         favorites = [
             m.Favorite(
@@ -284,8 +284,8 @@ def seed_database():
         print(f"  • {len(applications)} sample applications")
         print(f"  • {len(favorites)} sample favorites")
         print("\nLogin credentials:")
-        print("   Admin: admin@t.ca / 123456Pw")
-        print("   User: test@t.ca / 123456Pw")
+        print("   Admin: test@t.ca / 123456Pw")
+        print("   User: ebasotest@gmail.com / 123456Pw")
         print("   User: john@t.ca / 123456Pw")
         print("\nYou can now start your backend:")
         print("  uvicorn app.main:app --reload")

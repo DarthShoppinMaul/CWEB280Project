@@ -1,12 +1,12 @@
 // Login.jsx
-// Enhanced login page with Google Sign-In and Remember Me checkbox
+
 
 import React, {useState, useEffect} from 'react';
 import {useNavigate, Link, useSearchParams} from 'react-router-dom';
 import {useAuth} from '../../context/AuthContext';
 
 export default function Login() {
-    const {login} = useAuth();
+    const {login, user, isAuthenticated} = useAuth(); // Get isAuthenticated flag
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
 
@@ -16,6 +16,13 @@ export default function Login() {
     const [rememberMe, setRememberMe] = useState(false);
     const [errors, setErrors] = useState({});
     const [isSubmitting, setIsSubmitting] = useState(false);
+
+    // Redirect if already authenticated (handles timing issues)
+    useEffect(() => {
+        if (isAuthenticated && !isSubmitting) {
+            navigate('/pets');
+        }
+    }, [isAuthenticated, navigate, isSubmitting]);
 
     // Check for OAuth error in URL
     useEffect(() => {
@@ -45,7 +52,7 @@ export default function Login() {
         return Object.keys(newErrors).length === 0;
     };
 
-    // Handle regular login
+    // Handle regular login - FIXED for timing
     const handleSubmit = async (e) => {
         e.preventDefault();
         setErrors({});
@@ -55,29 +62,40 @@ export default function Login() {
         }
 
         setIsSubmitting(true);
-        const result = await login(email, password, rememberMe);
 
-        if (result.success) {
-            // Redirect to dashboard if admin, otherwise to pets page
-            const redirectPath = result.user?.is_admin ? '/admin/dashboard' : '/pets';
-            navigate(redirectPath);
-        } else {
-            setErrors({submit: result.error});
+        try {
+            const result = await login(email, password);
+
+            if (result.success) {
+                console.log('Login successful, waiting for context update...');
+
+                // Small delay to ensure context updates
+                setTimeout(() => {
+                    if (!isAuthenticated) {
+                        //If context didn't update, navigate manually
+                        console.log('Fallback redirect to /pets');
+                        navigate('/pets');
+                    }
+                }, 100);
+            } else {
+                setErrors({submit: result.error || 'Login failed'});
+                setIsSubmitting(false);
+            }
+        } catch (error) {
+            console.error('Login error:', error);
+            setErrors({submit: 'Login failed. Please try again.'});
+            setIsSubmitting(false);
         }
-
-        setIsSubmitting(false);
     };
 
-    // Handle Google Sign-In - redirects to backend OAuth endpoint
+    // Handle Google Sign-In
     const handleGoogleSignIn = () => {
-        // Redirect to backend Google OAuth endpoint
-        // The backend will handle the OAuth flow and redirect back to frontend
         window.location.href = 'http://localhost:8000/auth/google/login';
     };
 
     return (
         <div className="container-narrow">
-            <h1 className="text-3xl mb-6 text-center">Login to Pet Gallery</h1>
+            <h1 className="text-3xl mb-6 text-center">Login</h1>
 
             <div className="panel max-w-md mx-auto">
                 <form onSubmit={handleSubmit}>
@@ -90,8 +108,9 @@ export default function Login() {
 
                     {/* Email field */}
                     <div className="mb-4">
-                        <label className="block mb-2 text-sm font-medium">Email</label>
+                        <label htmlFor="email" className="block mb-2 text-sm font-medium">Email</label>
                         <input
+                            id="email"
                             type="email"
                             className={`input w-full ${errors.email ? 'border-red-500' : ''}`}
                             value={email}
@@ -104,9 +123,10 @@ export default function Login() {
                             disabled={isSubmitting}
                             placeholder="your@email.com"
                             data-cy="email-input"
+                            required
                         />
                         {errors.email && (
-                            <div className="text-red-400 text-sm mt-1">
+                            <div className="text-red-400 text-sm mt-1" data-cy="email-error">
                                 {errors.email}
                             </div>
                         )}
@@ -114,8 +134,9 @@ export default function Login() {
 
                     {/* Password field */}
                     <div className="mb-4">
-                        <label className="block mb-2 text-sm font-medium">Password</label>
+                        <label htmlFor="password" className="block mb-2 text-sm font-medium">Password</label>
                         <input
+                            id="password"
                             type="password"
                             className={`input w-full ${errors.password ? 'border-red-500' : ''}`}
                             value={password}
@@ -128,15 +149,16 @@ export default function Login() {
                             disabled={isSubmitting}
                             placeholder="*****"
                             data-cy="password-input"
+                            required
                         />
                         {errors.password && (
-                            <div className="text-red-400 text-sm mt-1">
+                            <div className="text-red-400 text-sm mt-1" data-cy="password-error">
                                 {errors.password}
                             </div>
                         )}
                     </div>
 
-                    {/* Remember Me & Forgot Password row */}
+                    {/* Remember Me */}
                     <div className="flex items-center justify-between mb-6">
                         <label className="flex items-center cursor-pointer">
                             <input
@@ -145,6 +167,7 @@ export default function Login() {
                                 onChange={(e) => setRememberMe(e.target.checked)}
                                 className="w-4 h-4 rounded border-[#3a5a86] bg-[#143058] text-[#64FFDA] focus:ring-2 focus:ring-[#64FFDA] focus:ring-offset-0"
                                 disabled={isSubmitting}
+                                data-cy="remember-me-checkbox"
                             />
                             <span className="ml-2 text-sm">Remember me</span>
                         </label>
@@ -202,7 +225,7 @@ export default function Login() {
                     {/* Link to registration */}
                     <div className="mt-6 text-sm text-center text-[#B6C6DA]">
                         Don't have an account?{' '}
-                        <Link to="/register" className="text-[#64FFDA] hover:underline font-medium">
+                        <Link to="/register" className="text-[#64FFDA] hover:underline font-medium" data-cy="register-link">
                             Sign up
                         </Link>
                     </div>

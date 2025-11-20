@@ -152,9 +152,9 @@ export const locationsAPI = {
     },
 };
 
-// ============================================================================
+
 // PETS API
-// ============================================================================
+
 export const petsAPI = {
     list: async () => {
         const response = await fetch(`${API_BASE_URL}/pets`, {
