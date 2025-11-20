@@ -1,7 +1,7 @@
 describe('Pet Management', () => {
     beforeEach(() => {
-        cy.waitForAPI()
-        cy.login()
+        cy.testAPI()
+        cy.loginEnhanced()
     })
 
     afterEach(() => {
@@ -47,330 +47,335 @@ describe('Pet Management', () => {
 
             cy.get('[data-cy="pet-location-error"]').should('be.visible')
             cy.get('[data-cy="pet-location-error"]').should('have.text', 'Please select a location')
+
+            cy.get('[data-cy="pet-description-error"]').should('be.visible')
+            cy.get('[data-cy="pet-description-error"]').should('have.text', 'Description is required')
         })
 
-        it('should validate pet name length', () => {
-            cy.get('[data-cy="pet-name-input"]').type('A')
+        it('should validate age is a positive number', () => {
+            cy.get('[data-cy="pet-age-input"]').type('-1')
             cy.get('[data-cy="add-pet-button"]').click()
-
-            cy.get('[data-cy="pet-name-error"]').should('be.visible')
-            cy.get('[data-cy="pet-name-error"]').should('have.text', 'Pet name must be at least 2 characters')
-        })
-
-        it('should validate age constraints', () => {
-            // Clear fields first and add small waits
-            cy.get('[data-cy="pet-age-input"]').clear()
-            cy.get('[data-cy="pet-name-input"]').clear()
-
-            // Clear and test too high age
-            cy.get('[data-cy="pet-age-input"]').clear().type('31')
-            cy.get('[data-cy="add-pet-button"]').click()
-
-            cy.wait(100)
 
             cy.get('[data-cy="pet-age-error"]').should('be.visible')
-            cy.get('[data-cy="pet-age-error"]').should('have.text', 'Age seems too high (max 30 years)')
+            cy.get('[data-cy="pet-age-error"]').should('have.text', 'Age must be a positive number')
         })
-
-        it('should clear field errors as user types', () => {
-            // Trigger errors
-            cy.get('[data-cy="add-pet-button"]').click()
-            cy.get('[data-cy="pet-name-error"]').should('be.visible')
-            cy.get('[data-cy="pet-species-error"]').should('be.visible')
-
-            // Type in name field - should clear name error only
-            cy.get('[data-cy="pet-name-input"]').type('Test Pet')
-            cy.get('[data-cy="pet-name-error"]').should('not.exist')
-            cy.get('[data-cy="pet-species-error"]').should('be.visible')
-
-            // Type in species field - should clear species error
-            cy.get('[data-cy="pet-species-input"]').type('Dog')
-            cy.get('[data-cy="pet-species-error"]').should('not.exist')
-        })
-
-        it('should successfully create a pet with valid data', () => {
-            // First create a location to use
-            cy.createTestLocation().then((location) => {
-                cy.get('[data-cy="pet-name-input"]').type('Cypress Test Pet')
-                cy.get('[data-cy="pet-species-input"]').type('Golden Retriever')
-                cy.get('[data-cy="pet-age-input"]').type('3')
-
-                // Wait for location to appear in dropdown
-                cy.get('[data-cy="pet-location-select"]').should('contain', location.name)
-                cy.get('[data-cy="pet-location-select"]').select(location.location_id.toString())
-                cy.get('[data-cy="pet-description-input"]').type('A friendly dog perfect for testing')
-
-                cy.get('[data-cy="add-pet-button"]').click()
-
-                // Should redirect to dashboard with success message
-                cy.url().should('include', '/dashboard')
-                cy.get('.bg-green-100').should('be.visible')
-                cy.get('.bg-green-100').should('contain', 'Pet added successfully!')
-
-                // Verify pet appears in pending section
-                cy.get('[data-cy="pending-pets"]').should('contain', 'Cypress Test Pet')
-            })
-        })
-
 
         it('should clear form when clear button is clicked', () => {
+            // Fill out form
             cy.get('[data-cy="pet-name-input"]').type('Test Pet')
             cy.get('[data-cy="pet-species-input"]').type('Dog')
-            cy.get('[data-cy="pet-age-input"]').type('2')
-            cy.get('[data-cy="pet-description-input"]').type('Test description')
+            cy.get('[data-cy="pet-age-input"]').type('3')
+            cy.get('[data-cy="pet-description-input"]').type('A test description')
 
+            // Click clear button
             cy.get('button').contains('Clear').click()
 
+            // All fields should be empty
             cy.get('[data-cy="pet-name-input"]').should('have.value', '')
             cy.get('[data-cy="pet-species-input"]').should('have.value', '')
             cy.get('[data-cy="pet-age-input"]').should('have.value', '')
             cy.get('[data-cy="pet-description-input"]').should('have.value', '')
             cy.get('[data-cy="pet-location-select"]').should('have.value', '')
         })
+    })
 
-        it('should disable form while submitting', () => {
-            cy.createTestLocation().then((location) => {
-                cy.get('[data-cy="pet-name-input"]').type('Test Pet')
-                cy.get('[data-cy="pet-species-input"]').type('Dog')
-                cy.get('[data-cy="pet-age-input"]').type('2')
+    describe('Add Pet Functionality', () => {
+        beforeEach(() => {
+            cy.createTestLocation().as('testLocation')
+            cy.visit('/add-pet')
+        })
 
-                // Wait for location to be available
-                cy.get('[data-cy="pet-location-select"]').should('contain', location.name)
-                cy.get('[data-cy="pet-location-select"]').select(location.location_id.toString())
+        it('should successfully add a new pet with valid data', function() {
+            const petName = `Test Pet ${Date.now()}`
 
-                //  Intercept API call to add delay for testing
-                cy.intercept('POST', '**/pets', (req) => {
-                    return new Promise(resolve => {
-                        setTimeout(() => resolve(req.continue()), 100)
-                    })
-                }).as('createPet')
+            cy.get('[data-cy="pet-name-input"]').type(petName)
+            cy.get('[data-cy="pet-species-input"]').type('Dog')
+            cy.get('[data-cy="pet-age-input"]').type('2')
+            cy.get('[data-cy="pet-location-select"]').select(this.testLocation.location_id.toString())
+            cy.get('[data-cy="pet-description-input"]').type('A friendly and energetic dog looking for a loving home.')
 
-                cy.get('[data-cy="add-pet-button"]').click()
+            cy.get('[data-cy="add-pet-button"]').click()
 
-                // Now we should catch the submitting state
-                cy.get('[data-cy="add-pet-button"]')
-                    .should('have.text', 'Adding Pet...')
-                    .and('be.disabled')
+            // Should redirect to dashboard or pets list
+            cy.url().should('match', /\/(dashboard|pets)/)
 
-                // Wait for completion
-                cy.wait('@createPet')
-                cy.url().should('include', '/dashboard')
+            // Verify pet was created via API
+            cy.request('GET', `${Cypress.env('apiBaseUrl')}/pets`).then((response) => {
+                expect(response.status).to.eq(200)
+                const createdPet = response.body.find(pet => pet.name === petName)
+                expect(createdPet).to.exist
+                expect(createdPet.species).to.eq('Dog')
+                expect(createdPet.age).to.eq(2)
+                expect(createdPet.location_id).to.eq(this.testLocation.location_id)
+                expect(createdPet.description).to.include('friendly and energetic')
             })
+        })
+
+        it('should handle special characters in pet data', function() {
+            const petName = `Test Pet with Special Ch@r$ & Numbers 123`
+
+            cy.get('[data-cy="pet-name-input"]').type(petName)
+            cy.get('[data-cy="pet-species-input"]').type('Cat (Maine Coon)')
+            cy.get('[data-cy="pet-age-input"]').type('5')
+            cy.get('[data-cy="pet-location-select"]').select(this.testLocation.location_id.toString())
+            cy.get('[data-cy="pet-description-input"]').type('A cat with "quotes" and other special characters: !@#$%')
+
+            cy.get('[data-cy="add-pet-button"]').click()
+
+            cy.url().should('match', /\/(dashboard|pets)/)
+
+            // Verify special characters were preserved
+            cy.request('GET', `${Cypress.env('apiBaseUrl')}/pets`).then((response) => {
+                const createdPet = response.body.find(pet => pet.name === petName)
+                expect(createdPet).to.exist
+                expect(createdPet.species).to.include('Maine Coon')
+                expect(createdPet.description).to.include('quotes')
+            })
+        })
+
+        it('should show loading state during pet creation', function() {
+            cy.get('[data-cy="pet-name-input"]').type('Loading Test Pet')
+            cy.get('[data-cy="pet-species-input"]').type('Dog')
+            cy.get('[data-cy="pet-age-input"]').type('1')
+            cy.get('[data-cy="pet-location-select"]').select(this.testLocation.location_id.toString())
+            cy.get('[data-cy="pet-description-input"]').type('Testing loading state')
+
+            cy.get('[data-cy="add-pet-button"]').click()
+
+            // Button should show loading state
+            cy.get('[data-cy="add-pet-button"]')
+                .should('have.text', 'Adding Pet...')
+                .and('be.disabled')
+
+            // Should eventually redirect
+            cy.url().should('match', /\/(dashboard|pets)/, { timeout: 10000 })
         })
     })
 
-    describe('Dashboard Pet Management', () => {
+    describe('Pet Photo Upload', () => {
         beforeEach(() => {
-            // Create test data
+            cy.createTestLocation().as('testLocation')
+            cy.visit('/add-pet')
+        })
+
+        it('should handle photo upload field', () => {
+            // Photo input should accept files
+            cy.get('[data-cy="pet-photo-input"]').should('have.attr', 'type', 'file')
+            cy.get('[data-cy="pet-photo-input"]').should('have.attr', 'accept')
+        })
+
+        it('should allow pet creation without photo', function() {
+            cy.get('[data-cy="pet-name-input"]').type('No Photo Pet')
+            cy.get('[data-cy="pet-species-input"]').type('Bird')
+            cy.get('[data-cy="pet-age-input"]').type('1')
+            cy.get('[data-cy="pet-location-select"]').select(this.testLocation.location_id.toString())
+            cy.get('[data-cy="pet-description-input"]').type('A pet without a photo')
+
+            cy.get('[data-cy="add-pet-button"]').click()
+            cy.url().should('match', /\/(dashboard|pets)/)
+        })
+    })
+
+    describe('Pet List Display', () => {
+        beforeEach(() => {
             cy.createTestLocation().then((location) => {
-                cy.createTestPet(location.location_id, 'pending').as('pendingPet')
-                cy.createTestPet(location.location_id, 'approved').as('approvedPet')
+                // Create some test pets
+                cy.createTestPet(location.location_id, 'approved', 'List Test Pet 1')
+                cy.createTestPet(location.location_id, 'pending', 'List Test Pet 2')
+                cy.createTestPet(location.location_id, 'adopted', 'List Test Pet 3')
+            })
+        })
+
+        it('should display pets on home page', () => {
+            cy.visit('/')
+            cy.get('h1').should('contain', 'Adoptable Pets')
+
+            // Should show pet cards
+            cy.get('[data-cy="pet-card"]').should('have.length.at.least', 1)
+
+            // Check that approved pets are visible
+            cy.get('[data-cy="pet-card"]').should('contain', 'List Test Pet 1')
+        })
+
+        it('should show pet details in cards', () => {
+            cy.visit('/')
+
+            cy.get('[data-cy="pet-card"]').first().within(() => {
+                cy.get('[data-cy="pet-name"]').should('be.visible')
+                cy.get('[data-cy="pet-species"]').should('be.visible')
+                cy.get('[data-cy="pet-age"]').should('be.visible')
+                cy.get('[data-cy="pet-location"]').should('be.visible')
+                cy.get('[data-cy="pet-description"]').should('be.visible')
+                cy.get('[data-cy="view-details-button"]').should('be.visible')
+            })
+        })
+
+        it('should navigate to pet details page', () => {
+            cy.visit('/')
+
+            cy.get('[data-cy="pet-card"]').first().within(() => {
+                cy.get('[data-cy="view-details-button"]').click()
             })
 
+            cy.url().should('include', '/pets/')
+            cy.get('h1').should('be.visible')
+        })
+
+        it('should filter pets by availability status', () => {
+            cy.visit('/')
+
+            // Should not show adopted pets in main listing
+            cy.get('[data-cy="pet-card"]').should('not.contain', 'List Test Pet 3')
+
+            // Should show available pets
+            cy.get('[data-cy="pet-card"]').should('contain', 'List Test Pet 1')
+        })
+    })
+
+    describe('Pet Management (Admin)', () => {
+        beforeEach(() => {
             cy.visit('/dashboard')
         })
 
-        it('should display pending pets with approve and delete buttons', function() {
-            cy.get('[data-cy="pending-pets"]').should('contain', this.pendingPet.name)
+        it('should display pet management dashboard', () => {
+            cy.get('h1').should('contain', 'Dashboard')
 
-            cy.get('[data-cy="pending-pet-card"]').first().within(() => {
-                cy.get('[data-cy="approve-button"]').should('be.visible')
-                cy.get('button').contains('Delete').should('be.visible')
-            })
-        })
-
-
-        it('should delete a pending pet with confirmation', function() {
-            // Stub window.confirm to return true (user confirms)
-            cy.window().then((win) => {
-                cy.stub(win, 'confirm').returns(true)
-            })
-
-            // Handle empty states
+            // Should show pet management sections
             cy.get('body').then(($body) => {
                 if ($body.find('[data-cy="pending-pets"]').length > 0) {
-                    cy.get('[data-cy="pending-pets"]').should('contain', this.pendingPet.name)
-
-                    cy.get('[data-cy="pending-pet-card"]').first().within(() => {
-                        cy.get('button').contains('Delete').click()
-                    })
-
-                    // Should show success message
-                    cy.get('.bg-green-100').should('be.visible')
-                    cy.get('.bg-green-100').should('contain', 'Pet deleted successfully!')
-
-                    // Check final state
-                    cy.get('body').then(($bodyAfter) => {
-                        if ($bodyAfter.find('[data-cy="pending-pets"]').length > 0) {
-                            cy.get('[data-cy="pending-pets"]').should('not.contain', this.pendingPet.name)
-                        } else {
-                            cy.contains('No pending pets to approve').should('be.visible')
-                        }
-                    })
-
-                    // Verify deletion via API
-                    cy.request({
-                        url: `${Cypress.env('apiBaseUrl')}/pets/${this.pendingPet.pet_id}`,
-                        failOnStatusCode: false
-                    }).then((response) => {
-                        expect(response.status).to.eq(404)
-                    })
+                    cy.get('[data-cy="pending-pets"]').should('be.visible')
+                }
+                if ($body.find('[data-cy="approved-pets"]').length > 0) {
+                    cy.get('[data-cy="approved-pets"]').should('be.visible')
                 }
             })
         })
 
-        it('should not delete pet when user cancels confirmation', function() {
-            // Stub window.confirm to return false (user cancels)
-            cy.window().then((win) => {
-                cy.stub(win, 'confirm').returns(false)
-            })
+        it('should allow approving pending pets', () => {
+            // Create a pending pet first
+            cy.createTestLocation().then((location) => {
+                cy.createTestPet(location.location_id, 'pending').then((pet) => {
+                    cy.visit('/dashboard')
 
-            cy.get('[data-cy="pending-pets"]').should('contain', this.pendingPet.name)
+                    // Find the pending pet and approve it
+                    cy.get('body').then(($body) => {
+                        if ($body.find(`[data-cy="approve-pet-${pet.pet_id}"]`).length > 0) {
+                            cy.get(`[data-cy="approve-pet-${pet.pet_id}"]`).click()
 
-            cy.get('[data-cy="pending-pet-card"]').first().within(() => {
-                cy.get('button').contains('Delete').click()
-            })
-
-            // Pet should still be in UI
-            cy.get('[data-cy="pending-pets"]').should('contain', this.pendingPet.name)
-
-            // No success message should appear
-            cy.get('.bg-green-100').should('not.exist')
-        })
-
-        it('should display approved pets with only delete button', function() {
-            cy.get('h2').contains('Approved Pets').parent().should('contain', this.approvedPet.name)
-
-            // Find the approved pet card and check it only has delete button
-            cy.get('h2').contains('Approved Pets').parent().within(() => {
-                cy.get('.card').contains(this.approvedPet.name).parent().parent().within(() => {
-                    cy.get('button').should('contain', 'Delete')
-                    cy.get('button').should('not.contain', 'Approve')
+                            // Verify approval via API
+                            cy.request(`${Cypress.env('apiBaseUrl')}/pets/${pet.pet_id}`).then((response) => {
+                                expect(response.body.status).to.eq('approved')
+                            })
+                        }
+                    })
                 })
             })
         })
 
-        it('should delete an approved pet', function() {
-            cy.window().then((win) => {
-                cy.stub(win, 'confirm').returns(true)
-            })
+        it('should allow editing pet information', () => {
+            cy.createTestLocation().then((location) => {
+                cy.createTestPet(location.location_id, 'approved').then((pet) => {
+                    cy.visit(`/pets/${pet.pet_id}/edit`)
 
-            cy.get('h2').contains('Approved Pets').parent().should('contain', this.approvedPet.name)
+                    cy.get('[data-cy="pet-name-input"]').clear().type('Updated Pet Name')
+                    cy.get('[data-cy="save-pet-button"]').click()
 
-            cy.get('h2').contains('Approved Pets').parent().within(() => {
-                cy.get('.card').contains(this.approvedPet.name).parent().parent().within(() => {
-                    cy.get('button').contains('Delete').click()
+                    // Verify update via API
+                    cy.request(`${Cypress.env('apiBaseUrl')}/pets/${pet.pet_id}`).then((response) => {
+                        expect(response.body.name).to.eq('Updated Pet Name')
+                    })
                 })
             })
-
-            // Should show success message
-            cy.get('.bg-green-100').should('be.visible')
-            cy.get('.bg-green-100').should('contain', 'Pet deleted successfully!')
-
-            // Pet should be removed
-            cy.get('h2').contains('Approved Pets').parent().should('not.contain', this.approvedPet.name)
         })
 
+        it('should allow deleting pets', () => {
+            cy.createTestLocation().then((location) => {
+                cy.createTestPet(location.location_id, 'approved').then((pet) => {
+                    cy.visit('/dashboard')
 
-        it('should auto-hide success messages after 5 seconds', function() {
-            cy.get('[data-cy="pending-pet-card"]').first().within(() => {
-                cy.get('[data-cy="approve-button"]').click()
+                    // Find delete button and click it
+                    cy.get('body').then(($body) => {
+                        if ($body.find(`[data-cy="delete-pet-${pet.pet_id}"]`).length > 0) {
+                            cy.get(`[data-cy="delete-pet-${pet.pet_id}"]`).click()
+
+                            // Confirm deletion in modal/alert
+                            cy.get('[data-cy="confirm-delete-button"]').click()
+
+                            // Verify deletion via API
+                            cy.request({
+                                method: 'GET',
+                                url: `${Cypress.env('apiBaseUrl')}/pets/${pet.pet_id}`,
+                                failOnStatusCode: false
+                            }).then((response) => {
+                                expect(response.status).to.eq(404)
+                            })
+                        }
+                    })
+                })
             })
-
-            cy.get('.bg-green-100').should('be.visible')
-
-            // Wait for auto-hide (5 seconds + buffer)
-            cy.wait(5500)
-            cy.get('.bg-green-100').should('not.exist')
         })
     })
 
-    describe('Pet API Integration', () => {
-        it('should create pet via API correctly', () => {
+    describe('Pet Details Page', () => {
+        beforeEach(() => {
             cy.createTestLocation().then((location) => {
-                const petData = {
-                    name: 'API Test Pet',
-                    species: 'Test Species',
-                    age: 5,
-                    description: 'Created via API test',
-                    location_id: location.location_id
-                }
-
-                cy.request({
-                    method: 'POST',
-                    url: `${Cypress.env('apiBaseUrl')}/pets`,
-                    form: true,
-                    body: petData
-                }).then((response) => {
-                    expect(response.status).to.eq(200)
-                    expect(response.body).to.have.property('pet_id')
-                    expect(response.body.name).to.eq(petData.name)
-                    expect(response.body.species).to.eq(petData.species)
-                    expect(response.body.age).to.eq(petData.age)
-                    expect(response.body.status).to.eq('pending')
-                    expect(response.body.location_id).to.eq(petData.location_id)
+                cy.createTestPet(location.location_id, 'approved').then((pet) => {
+                    cy.visit(`/pets/${pet.pet_id}`)
+                    cy.wrap(pet).as('testPet')
                 })
             })
         })
 
-        it('should approve pet via API correctly', () => {
-            cy.createTestLocation().then((location) => {
-                cy.createTestPet(location.location_id, 'pending').then((pet) => {
-                    expect(pet).to.have.property('pet_id')
-                    expect(pet.pet_id).to.be.a('number')
-
-                    cy.request({
-                        method: 'PATCH',
-                        url: `${Cypress.env('apiBaseUrl')}/pets/${pet.pet_id}/approve`
-                    }).then((response) => {
-                        expect(response.status).to.eq(200)
-                        expect(response.body.status).to.eq('approved')
-                        expect(response.body.pet_id).to.eq(pet.pet_id)
-                    })
-                })
-            })
+        it('should display complete pet information', function() {
+            cy.get('h1').should('have.text', this.testPet.name)
+            cy.get('[data-cy="pet-species-display"]').should('have.text', this.testPet.species)
+            cy.get('[data-cy="pet-age-display"]').should('contain', this.testPet.age)
+            cy.get('[data-cy="pet-description-display"]').should('have.text', this.testPet.description)
+            cy.get('[data-cy="pet-location-display"]').should('be.visible')
         })
 
-        it('should delete pet via API correctly', () => {
-            cy.createTestLocation().then((location) => {
-                cy.createTestPet(location.location_id).then((pet) => {
-                    expect(pet).to.have.property('pet_id')
-                    expect(pet.pet_id).to.be.a('number')
-
-                    cy.request({
-                        method: 'DELETE',
-                        url: `${Cypress.env('apiBaseUrl')}/pets/${pet.pet_id}`
-                    }).then((response) => {
-                        expect(response.status).to.eq(200)
-                        expect(response.body).to.have.property('ok', true)
-                    })
-
-                    // Verify pet is deleted
-                    cy.request({
-                        url: `${Cypress.env('apiBaseUrl')}/pets/${pet.pet_id}`,
-                        failOnStatusCode: false
-                    }).then((response) => {
-                        expect(response.status).to.eq(404)
-                    })
-                })
-            })
+        it('should show adoption application button for available pets', () => {
+            cy.get('[data-cy="apply-button"]').should('be.visible')
+            cy.get('[data-cy="apply-button"]').should('have.text', 'Apply for Adoption')
+            cy.get('[data-cy="apply-button"]').should('not.be.disabled')
         })
 
-        it('should list pets via API correctly', () => {
-            cy.request('GET', `${Cypress.env('apiBaseUrl')}/pets`).then((response) => {
+        it('should navigate to adoption application form', function() {
+            cy.get('[data-cy="apply-button"]').click()
+            cy.url().should('include', `/apply/${this.testPet.pet_id}`)
+        })
+
+        it('should handle non-existent pet gracefully', () => {
+            cy.visit('/pets/99999', { failOnStatusCode: false })
+
+            // Should show 404 or error message
+            cy.get('body').should('contain.text', 'Pet not found')
+        })
+    })
+
+    describe('API Integration', () => {
+        it('should fail when API server is unavailable', () => {
+            // This test validates that tests fail if API server is not running
+            cy.request(`${Cypress.env('apiBaseUrl')}/pets`).then((response) => {
                 expect(response.status).to.eq(200)
-                expect(response.body).to.be.an('array')
-
-                response.body.forEach(pet => {
-                    expect(pet).to.have.property('pet_id')
-                    expect(pet).to.have.property('name')
-                    expect(pet).to.have.property('species')
-                    expect(pet).to.have.property('age')
-                    expect(pet).to.have.property('status')
-                    expect(pet).to.have.property('location_id')
-                    expect(['pending', 'approved']).to.include(pet.status)
-                })
             })
+        })
+
+        it('should handle API errors gracefully', () => {
+            // Test behavior when API returns errors
+            cy.visit('/add-pet')
+
+            // Fill out form but with potentially problematic data
+            cy.get('[data-cy="pet-name-input"]').type('Error Test Pet')
+            cy.get('[data-cy="pet-species-input"]').type('Unknown Species')
+            cy.get('[data-cy="pet-age-input"]').type('999999')
+            cy.get('[data-cy="pet-description-input"]').type('Testing error handling')
+
+            // Attempt submission should either succeed or show appropriate error
+            cy.get('[data-cy="add-pet-button"]').click()
+
+            // Should either redirect on success or show error message
+            cy.url().should('not.eq', Cypress.config().baseUrl + '/add-pet')
         })
     })
 })

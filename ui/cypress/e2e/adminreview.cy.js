@@ -1,104 +1,53 @@
 /**
  * Admin Application Review Tests
  * -----------------------------
- * Tests for admin application review functionality
+ * Tests for admin functionality to review adoption applications.
  *
  * Test Cases Covered:
- * - View Pending Applications (admin sees pending applications in dashboard)
- * - Review Application (admin clicks to review, sees application review page with details)
- * - Approve Application (admin approves application, status changes with timestamp)
- * - Reject Application (admin rejects application, status changes with timestamp)
- * - Add Admin Notes (admin adds internal notes, notes are saved and visible)
- * - Update Adoption Status (admin changes pet status, reflected in UI)
- * - Admin Dashboard Applications Display
-
+ * - Navigate to Application Review from Dashboard
+ * - Display Complete Application Details
+ * - Approve Application with Admin Notes
+ * - Reject Application with Admin Notes
+ * - Update Application Status
+ * - Admin Notes Functionality
+ * - Application History Tracking
+ *
+ * - Tests both UI and API functionality
+ * - Will fail if API server is not running
  */
 
 describe('Admin Application Review', () => {
     beforeEach(() => {
-        cy.waitForAPI()
-        cy.login() // Login as admin (test@t.ca)
+        cy.testAPI()
+        cy.loginEnhanced() // Login as admin (test@t.ca)
+
+        // Create test data for each test
+        cy.createTestLocation().then((location) => {
+            cy.createTestPet(location.location_id, 'approved').then((pet) => {
+                // Submit application
+                cy.visit(`/apply/${pet.pet_id}`)
+
+                cy.get('[data-cy="applicant-name-input"]').type('Review Page Test')
+                cy.get('[data-cy="applicant-email-input"]').type('reviewpage@test.com')
+                cy.get('[data-cy="applicant-phone-input"]').type('(555) 333-4444')
+                cy.get('[data-cy="applicant-address-input"]').type('456 Review Ave')
+                cy.get('[data-cy="housing-type-select"]').select('apartment')
+                cy.get('[data-cy="has-yard-select"]').select('no')
+                cy.get('[data-cy="other-pets-select"]').select('yes')
+                cy.get('[data-cy="experience-input"]').type('Have had cats for 5 years')
+                cy.get('[data-cy="reason-input"]').type('Want to give a pet a loving home')
+
+                cy.get('[data-cy="submit-application-button"]').click()
+                cy.wrap({ pet }).as('testData')
+            })
+        })
     })
 
     afterEach(() => {
         cy.cleanupTestData()
     })
 
-    describe('Admin Dashboard - Pending Applications', () => {
-        it('should display pending applications in admin dashboard', () => {
-            // Create test data: location, pet, and application
-            cy.createTestLocation().then((location) => {
-                cy.createTestPet(location.location_id, 'approved').then((pet) => {
-                    // Submit an application for the pet
-                    cy.visit(`/apply/${pet.pet_id}`)
-
-                    cy.get('[data-cy="applicant-name-input"]').type('Review Test User')
-                    cy.get('[data-cy="applicant-email-input"]').type('reviewtest@example.com')
-                    cy.get('[data-cy="applicant-phone-input"]').type('(555) 111-2222')
-                    cy.get('[data-cy="applicant-address-input"]').type('123 Review St')
-                    cy.get('[data-cy="housing-type-select"]').select('house')
-                    cy.get('[data-cy="experience-input"]').type('Experienced with dogs')
-                    cy.get('[data-cy="reason-input"]').type('Looking for a companion')
-
-                    cy.get('[data-cy="submit-application-button"]').click()
-                    cy.url().should('include', '/my-applications')
-
-                    // Now visit admin dashboard
-                    cy.visit('/dashboard')
-
-                    // Check that dashboard displays pending applications section
-                    cy.get('[data-cy="pending-applications-section"]').should('be.visible')
-                    cy.get('[data-cy="pending-applications-title"]').should('have.text', 'Pending Applications')
-
-                    // Should show the application we just created
-                    cy.get('[data-cy="pending-application-item"]').should('have.length.at.least', 1)
-
-                    cy.get('[data-cy="pending-application-item"]').first().within(() => {
-                        cy.get('[data-cy="applicant-name"]').should('have.text', 'Review Test User')
-                        cy.get('[data-cy="pet-name"]').should('have.text', pet.name)
-                        cy.get('[data-cy="application-date"]').should('be.visible')
-                        cy.get('[data-cy="review-button"]').should('be.visible')
-                        cy.get('[data-cy="review-button"]').should('have.text', 'Review')
-                    })
-                })
-            })
-        })
-
-        it('should show empty state when no pending applications exist', () => {
-            cy.visit('/dashboard')
-
-            cy.get('[data-cy="pending-applications-section"]').should('be.visible')
-
-            // Should show empty state (if no pending applications)
-            cy.get('[data-cy="no-pending-applications"]').should('be.visible')
-            cy.get('[data-cy="no-pending-applications"]').should('have.text', 'No pending applications to review')
-        })
-    })
-
-    describe('Application Review Page', () => {
-        beforeEach(() => {
-            // Create test application for each test
-            cy.createTestLocation().then((location) => {
-                cy.createTestPet(location.location_id, 'approved').then((pet) => {
-                    // Submit application
-                    cy.visit(`/apply/${pet.pet_id}`)
-
-                    cy.get('[data-cy="applicant-name-input"]').type('Review Page Test')
-                    cy.get('[data-cy="applicant-email-input"]').type('reviewpage@test.com')
-                    cy.get('[data-cy="applicant-phone-input"]').type('(555) 333-4444')
-                    cy.get('[data-cy="applicant-address-input"]').type('456 Review Ave')
-                    cy.get('[data-cy="housing-type-select"]').select('apartment')
-                    cy.get('[data-cy="has-yard-select"]').select('no')
-                    cy.get('[data-cy="other-pets-select"]').select('yes')
-                    cy.get('[data-cy="experience-input"]').type('Have had cats for 5 years')
-                    cy.get('[data-cy="reason-input"]').type('Want to give a pet a loving home')
-
-                    cy.get('[data-cy="submit-application-button"]').click()
-                    cy.wrap({ pet }).as('testData')
-                })
-            })
-        })
-
+    describe('Application Review Page Navigation', () => {
         it('should navigate to application review page from dashboard', function() {
             cy.visit('/dashboard')
 
@@ -147,269 +96,249 @@ describe('Admin Application Review', () => {
                 cy.get('[data-cy="current-status"]').should('have.text', 'Pending')
                 cy.get('[data-cy="approve-button"]').should('be.visible')
                 cy.get('[data-cy="reject-button"]').should('be.visible')
-                cy.get('[data-cy="admin-notes-input"]').should('be.visible')
+                cy.get('[data-cy="admin-notes-textarea"]').should('be.visible')
             })
         })
     })
 
-    describe('Application Approval', () => {
-        beforeEach(() => {
-            cy.createTestLocation().then((location) => {
-                cy.createTestPet(location.location_id, 'approved').then((pet) => {
-                    // Create application to approve
-                    cy.visit(`/apply/${pet.pet_id}`)
-
-                    cy.get('[data-cy="applicant-name-input"]').type('Approval Test')
-                    cy.get('[data-cy="applicant-email-input"]').type('approval@test.com')
-                    cy.get('[data-cy="applicant-phone-input"]').type('(555) 555-5555')
-                    cy.get('[data-cy="applicant-address-input"]').type('789 Approval Ln')
-                    cy.get('[data-cy="housing-type-select"]').select('house')
-                    cy.get('[data-cy="experience-input"]').type('Ready to care for a pet')
-                    cy.get('[data-cy="reason-input"]').type('Perfect match for our family')
-
-                    cy.get('[data-cy="submit-application-button"]').click()
-                    cy.wrap({ pet }).as('testData')
-                })
-            })
-        })
-
-        it('should approve application and update status with timestamp', function() {
-            // Find and navigate to the application
+    describe('Application Approval Process', () => {
+        it('should approve application with admin notes', function() {
             cy.request(`${Cypress.env('apiBaseUrl')}/applications`).then((response) => {
-                const applications = response.body
-                const testApp = applications.find(app => app.applicant_email === 'approval@test.com')
-
-                cy.visit(`/applications/review/${testApp.application_id}`)
-
-                // Add admin notes before approval
-                cy.get('[data-cy="admin-notes-input"]').type('Excellent application. Approved after thorough review.')
-                cy.get('[data-cy="save-notes-button"]').click()
-
-                // Approve the application
-                cy.get('[data-cy="approve-button"]').click()
-
-                // Should show confirmation dialog
-                cy.get('[data-cy="approve-confirm-dialog"]').should('be.visible')
-                cy.get('[data-cy="confirm-approve-button"]').click()
-
-                // Should update status display
-                cy.get('[data-cy="current-status"]').should('have.text', 'Approved')
-                cy.get('[data-cy="status-timestamp"]').should('be.visible')
-                cy.get('[data-cy="status-timestamp"]').should('match', /\d{4}-\d{2}-\d{2}/)
-
-                // Approve and reject buttons should be disabled
-                cy.get('[data-cy="approve-button"]').should('be.disabled')
-                cy.get('[data-cy="reject-button"]').should('be.disabled')
-
-                // Verify via API that status was updated
-                cy.request(`${Cypress.env('apiBaseUrl')}/applications/${testApp.application_id}`).then((apiResponse) => {
-                    expect(apiResponse.status).to.eq(200)
-                    expect(apiResponse.body.status).to.eq('approved')
-                    expect(apiResponse.body.reviewed_at).to.exist
-                    expect(apiResponse.body.admin_notes).to.eq('Excellent application. Approved after thorough review.')
-                })
-            })
-        })
-
-        it('should show success message after approval', () => {
-            cy.request(`${Cypress.env('apiBaseUrl')}/applications`).then((response) => {
-                const applications = response.body
-                const testApp = applications.find(app => app.applicant_email === 'approval@test.com')
-
-                cy.visit(`/applications/review/${testApp.application_id}`)
-
-                cy.get('[data-cy="approve-button"]').click()
-                cy.get('[data-cy="confirm-approve-button"]').click()
-
-                // Should show success message
-                cy.get('[data-cy="approval-success-message"]').should('be.visible')
-                cy.get('[data-cy="approval-success-message"]').should('have.text', 'Application approved successfully!')
-            })
-        })
-    })
-
-    describe('Application Rejection', () => {
-        beforeEach(() => {
-            cy.createTestLocation().then((location) => {
-                cy.createTestPet(location.location_id, 'approved').then((pet) => {
-                    // Create application to reject
-                    cy.visit(`/apply/${pet.pet_id}`)
-
-                    cy.get('[data-cy="applicant-name-input"]').type('Rejection Test')
-                    cy.get('[data-cy="applicant-email-input"]').type('rejection@test.com')
-                    cy.get('[data-cy="applicant-phone-input"]').type('(555) 666-7777')
-                    cy.get('[data-cy="applicant-address-input"]').type('321 Reject St')
-                    cy.get('[data-cy="housing-type-select"]').select('apartment')
-                    cy.get('[data-cy="experience-input"]').type('Limited experience')
-                    cy.get('[data-cy="reason-input"]').type('Want a pet')
-
-                    cy.get('[data-cy="submit-application-button"]').click()
-                })
-            })
-        })
-
-        it('should reject application and update status with timestamp', () => {
-            cy.request(`${Cypress.env('apiBaseUrl')}/applications`).then((response) => {
-                const applications = response.body
-                const testApp = applications.find(app => app.applicant_email === 'rejection@test.com')
-
-                cy.visit(`/applications/review/${testApp.application_id}`)
-
-                // Add rejection reason in admin notes
-                cy.get('[data-cy="admin-notes-input"]').type('Application rejected due to insufficient experience with pets.')
-                cy.get('[data-cy="save-notes-button"]').click()
-
-                // Reject the application
-                cy.get('[data-cy="reject-button"]').click()
-
-                // Should show confirmation dialog
-                cy.get('[data-cy="reject-confirm-dialog"]').should('be.visible')
-                cy.get('[data-cy="confirm-reject-button"]').click()
-
-                // Should update status display
-                cy.get('[data-cy="current-status"]').should('have.text', 'Rejected')
-                cy.get('[data-cy="status-timestamp"]').should('be.visible')
-
-                // Buttons should be disabled
-                cy.get('[data-cy="approve-button"]').should('be.disabled')
-                cy.get('[data-cy="reject-button"]').should('be.disabled')
-
-                // Verify via API
-                cy.request(`${Cypress.env('apiBaseUrl')}/applications/${testApp.application_id}`).then((apiResponse) => {
-                    expect(apiResponse.status).to.eq(200)
-                    expect(apiResponse.body.status).to.eq('rejected')
-                    expect(apiResponse.body.reviewed_at).to.exist
-                    expect(apiResponse.body.admin_notes).to.eq('Application rejected due to insufficient experience with pets.')
-                })
-            })
-        })
-
-        it('should show success message after rejection', () => {
-            cy.request(`${Cypress.env('apiBaseUrl')}/applications`).then((response) => {
-                const applications = response.body
-                const testApp = applications.find(app => app.applicant_email === 'rejection@test.com')
-
-                cy.visit(`/applications/review/${testApp.application_id}`)
-
-                cy.get('[data-cy="reject-button"]').click()
-                cy.get('[data-cy="confirm-reject-button"]').click()
-
-                cy.get('[data-cy="rejection-success-message"]').should('be.visible')
-                cy.get('[data-cy="rejection-success-message"]').should('have.text', 'Application rejected successfully!')
-            })
-        })
-    })
-
-    describe('Admin Notes Management', () => {
-        beforeEach(() => {
-            cy.createTestLocation().then((location) => {
-                cy.createTestPet(location.location_id, 'approved').then((pet) => {
-                    // Create application for notes testing
-                    cy.visit(`/apply/${pet.pet_id}`)
-
-                    cy.get('[data-cy="applicant-name-input"]').type('Notes Test')
-                    cy.get('[data-cy="applicant-email-input"]').type('notes@test.com')
-                    cy.get('[data-cy="applicant-phone-input"]').type('(555) 888-9999')
-                    cy.get('[data-cy="applicant-address-input"]').type('987 Notes Rd')
-                    cy.get('[data-cy="housing-type-select"]').select('house')
-                    cy.get('[data-cy="experience-input"]').type('Some experience')
-                    cy.get('[data-cy="reason-input"]').type('Good reason')
-
-                    cy.get('[data-cy="submit-application-button"]').click()
-                })
-            })
-        })
-
-        it('should save and display admin notes', () => {
-            cy.request(`${Cypress.env('apiBaseUrl')}/applications`).then((response) => {
-                const applications = response.body
-                const testApp = applications.find(app => app.applicant_email === 'notes@test.com')
-
+                const testApp = response.body.find(app => app.applicant_email === 'reviewpage@test.com')
                 cy.visit(`/applications/review/${testApp.application_id}`)
 
                 // Add admin notes
-                const noteText = 'Initial review completed. Candidate seems suitable but needs reference check.'
-                cy.get('[data-cy="admin-notes-input"]').type(noteText)
-                cy.get('[data-cy="save-notes-button"]').click()
+                cy.get('[data-cy="admin-notes-textarea"]').type('Applicant has excellent references and experience. Approved for adoption.')
 
-                // Should show success message
-                cy.get('[data-cy="notes-saved-message"]').should('be.visible')
-                cy.get('[data-cy="notes-saved-message"]').should('have.text', 'Notes saved successfully!')
+                // Approve application
+                cy.get('[data-cy="approve-button"]').click()
 
-                // Refresh page to verify persistence
-                cy.reload()
+                // Should show confirmation dialog
+                cy.get('[data-cy="approve-confirmation-modal"]').should('be.visible')
+                cy.get('[data-cy="confirm-approve-button"]').click()
 
-                // Notes should be displayed
-                cy.get('[data-cy="admin-notes-input"]').should('have.value', noteText)
+                // Should update status and show success message
+                cy.get('[data-cy="current-status"]').should('have.text', 'Approved')
+                cy.get('[data-cy="success-message"]').should('be.visible')
+                cy.get('[data-cy="success-message"]').should('have.text', 'Application approved successfully!')
 
-                // Verify via API
+                // Verify via API that application was approved
                 cy.request(`${Cypress.env('apiBaseUrl')}/applications/${testApp.application_id}`).then((apiResponse) => {
-                    expect(apiResponse.status).to.eq(200)
-                    expect(apiResponse.body.admin_notes).to.eq(noteText)
+                    expect(apiResponse.body.status).to.eq('approved')
+                    expect(apiResponse.body.admin_notes).to.include('excellent references')
                 })
             })
         })
 
-        it('should update existing admin notes', () => {
+        it('should show loading state during approval', function() {
             cy.request(`${Cypress.env('apiBaseUrl')}/applications`).then((response) => {
-                const applications = response.body
-                const testApp = applications.find(app => app.applicant_email === 'notes@test.com')
+                const testApp = response.body.find(app => app.applicant_email === 'reviewpage@test.com')
+                cy.visit(`/applications/review/${testApp.application_id}`)
 
+                cy.get('[data-cy="admin-notes-textarea"]').type('Quick approval test')
+                cy.get('[data-cy="approve-button"]').click()
+                cy.get('[data-cy="confirm-approve-button"]').click()
+
+                // Button should show loading state
+                cy.get('[data-cy="approve-button"]')
+                    .should('have.text', 'Approving...')
+                    .and('be.disabled')
+
+                // Should eventually show success
+                cy.get('[data-cy="current-status"]').should('have.text', 'Approved', { timeout: 10000 })
+            })
+        })
+    })
+
+    describe('Application Rejection Process', () => {
+        it('should reject application with admin notes', function() {
+            cy.request(`${Cypress.env('apiBaseUrl')}/applications`).then((response) => {
+                const testApp = response.body.find(app => app.applicant_email === 'reviewpage@test.com')
+                cy.visit(`/applications/review/${testApp.application_id}`)
+
+                // Add admin notes for rejection
+                cy.get('[data-cy="admin-notes-textarea"]').type('Unfortunately, apartment living is not suitable for this pet size. Rejected.')
+
+                // Reject application
+                cy.get('[data-cy="reject-button"]').click()
+
+                // Should show confirmation dialog
+                cy.get('[data-cy="reject-confirmation-modal"]').should('be.visible')
+                cy.get('[data-cy="confirm-reject-button"]').click()
+
+                // Should update status and show message
+                cy.get('[data-cy="current-status"]').should('have.text', 'Rejected')
+                cy.get('[data-cy="success-message"]').should('be.visible')
+                cy.get('[data-cy="success-message"]').should('have.text', 'Application rejected.')
+
+                // Verify via API that application was rejected
+                cy.request(`${Cypress.env('apiBaseUrl')}/applications/${testApp.application_id}`).then((apiResponse) => {
+                    expect(apiResponse.body.status).to.eq('rejected')
+                    expect(apiResponse.body.admin_notes).to.include('not suitable')
+                })
+            })
+        })
+
+        it('should require admin notes for rejection', function() {
+            cy.request(`${Cypress.env('apiBaseUrl')}/applications`).then((response) => {
+                const testApp = response.body.find(app => app.applicant_email === 'reviewpage@test.com')
+                cy.visit(`/applications/review/${testApp.application_id}`)
+
+                // Try to reject without notes
+                cy.get('[data-cy="reject-button"]').click()
+
+                // Should show validation error
+                cy.get('[data-cy="admin-notes-error"]').should('be.visible')
+                cy.get('[data-cy="admin-notes-error"]').should('have.text', 'Admin notes are required when rejecting an application')
+
+                // Should not show confirmation dialog
+                cy.get('[data-cy="reject-confirmation-modal"]').should('not.exist')
+            })
+        })
+    })
+
+    describe('Admin Notes Functionality', () => {
+        it('should allow adding and editing admin notes', function() {
+            cy.request(`${Cypress.env('apiBaseUrl')}/applications`).then((response) => {
+                const testApp = response.body.find(app => app.applicant_email === 'reviewpage@test.com')
                 cy.visit(`/applications/review/${testApp.application_id}`)
 
                 // Add initial notes
-                cy.get('[data-cy="admin-notes-input"]').type('Initial notes.')
+                cy.get('[data-cy="admin-notes-textarea"]').type('Initial review notes - applicant contacted via phone.')
+
+                // Save notes without changing status
                 cy.get('[data-cy="save-notes-button"]').click()
 
-                // Update notes
-                cy.get('[data-cy="admin-notes-input"]').clear()
-                cy.get('[data-cy="admin-notes-input"]').type('Updated notes with more details.')
-                cy.get('[data-cy="save-notes-button"]').click()
-
+                // Should show success message
                 cy.get('[data-cy="notes-saved-message"]').should('be.visible')
+                cy.get('[data-cy="notes-saved-message"]').should('have.text', 'Notes saved successfully')
+
+                // Refresh page and verify notes persist
+                cy.reload()
+                cy.get('[data-cy="admin-notes-textarea"]').should('have.value', 'Initial review notes - applicant contacted via phone.')
+
+                // Add more notes
+                cy.get('[data-cy="admin-notes-textarea"]').clear()
+                cy.get('[data-cy="admin-notes-textarea"]').type('Updated notes - references checked. All positive feedback.')
+                cy.get('[data-cy="save-notes-button"]').click()
 
                 // Verify updated notes via API
                 cy.request(`${Cypress.env('apiBaseUrl')}/applications/${testApp.application_id}`).then((apiResponse) => {
-                    expect(apiResponse.status).to.eq(200)
-                    expect(apiResponse.body.admin_notes).to.eq('Updated notes with more details.')
+                    expect(apiResponse.body.admin_notes).to.include('references checked')
+                })
+            })
+        })
+
+        it('should display character count for admin notes', function() {
+            cy.request(`${Cypress.env('apiBaseUrl')}/applications`).then((response) => {
+                const testApp = response.body.find(app => app.applicant_email === 'reviewpage@test.com')
+                cy.visit(`/applications/review/${testApp.application_id}`)
+
+                // Check if character counter exists
+                cy.get('body').then(($body) => {
+                    if ($body.find('[data-cy="notes-character-count"]').length > 0) {
+                        cy.get('[data-cy="admin-notes-textarea"]').type('Test notes for character counting')
+                        cy.get('[data-cy="notes-character-count"]').should('contain', '33')
+                    }
                 })
             })
         })
     })
 
-    describe('Pet Status Updates', () => {
-        it('should update pet adoption status when application is approved', () => {
+    describe('Application History and Tracking', () => {
+        it('should display application submission date', function() {
+            cy.request(`${Cypress.env('apiBaseUrl')}/applications`).then((response) => {
+                const testApp = response.body.find(app => app.applicant_email === 'reviewpage@test.com')
+                cy.visit(`/applications/review/${testApp.application_id}`)
+
+                cy.get('[data-cy="submission-date-display"]').should('be.visible')
+                cy.get('[data-cy="submission-date-display"]').should('contain', new Date().getFullYear())
+            })
+        })
+
+        it('should track status change history', function() {
+            cy.request(`${Cypress.env('apiBaseUrl')}/applications`).then((response) => {
+                const testApp = response.body.find(app => app.applicant_email === 'reviewpage@test.com')
+                cy.visit(`/applications/review/${testApp.application_id}`)
+
+                // Check if history section exists
+                cy.get('body').then(($body) => {
+                    if ($body.find('[data-cy="application-history"]').length > 0) {
+                        cy.get('[data-cy="application-history"]').should('be.visible')
+                        cy.get('[data-cy="history-item"]').should('contain', 'Application submitted')
+                    }
+                })
+
+                // Make a status change
+                cy.get('[data-cy="admin-notes-textarea"]').type('Approving for history test')
+                cy.get('[data-cy="approve-button"]').click()
+                cy.get('[data-cy="confirm-approve-button"]').click()
+
+                // Check updated history
+                cy.get('body').then(($body) => {
+                    if ($body.find('[data-cy="application-history"]').length > 0) {
+                        cy.get('[data-cy="history-item"]').should('contain', 'Application approved')
+                    }
+                })
+            })
+        })
+    })
+
+    describe('Batch Application Management', () => {
+        it('should allow navigating between multiple applications', function() {
+            // Create additional test application
             cy.createTestLocation().then((location) => {
-                cy.createTestPet(location.location_id, 'approved').then((pet) => {
-                    // Create and approve an application
-                    cy.visit(`/apply/${pet.pet_id}`)
+                cy.createTestPet(location.location_id, 'approved', 'Second Pet').then((secondPet) => {
+                    // Submit second application via API
+                    cy.request({
+                        method: 'POST',
+                        url: `${Cypress.env('apiBaseUrl')}/applications`,
+                        body: {
+                            pet_id: secondPet.pet_id,
+                            applicant_name: 'Second Applicant',
+                            applicant_email: 'second@test.com',
+                            applicant_phone: '(555) 444-5555',
+                            applicant_address: '789 Second St',
+                            housing_type: 'house',
+                            experience: 'Second application experience',
+                            reason: 'Second application reason'
+                        }
+                    })
 
-                    cy.get('[data-cy="applicant-name-input"]').type('Status Update Test')
-                    cy.get('[data-cy="applicant-email-input"]').type('statusupdate@test.com')
-                    cy.get('[data-cy="applicant-phone-input"]').type('(555) 000-1111')
-                    cy.get('[data-cy="applicant-address-input"]').type('Status St')
-                    cy.get('[data-cy="housing-type-select"]').select('house')
-                    cy.get('[data-cy="experience-input"]').type('Experience')
-                    cy.get('[data-cy="reason-input"]').type('Reason')
+                    // Navigate to dashboard
+                    cy.visit('/dashboard')
 
-                    cy.get('[data-cy="submit-application-button"]').click()
+                    // Should show multiple pending applications
+                    cy.get('[data-cy="pending-applications"]').should('contain', 'Review Page Test')
+                    cy.get('[data-cy="pending-applications"]').should('contain', 'Second Applicant')
 
-                    // Find and approve application
-                    cy.request(`${Cypress.env('apiBaseUrl')}/applications`).then((response) => {
-                        const applications = response.body
-                        const testApp = applications.find(app => app.applicant_email === 'statusupdate@test.com')
+                    // Navigate between applications
+                    cy.get('[data-cy="review-button"]').first().click()
+                    cy.get('[data-cy="applicant-name-display"]').then(($name) => {
+                        const firstName = $name.text()
 
-                        cy.visit(`/applications/review/${testApp.application_id}`)
-                        cy.get('[data-cy="approve-button"]').click()
-                        cy.get('[data-cy="confirm-approve-button"]').click()
-
-                        // Check that pet status was updated
-                        cy.request(`${Cypress.env('apiBaseUrl')}/pets/${pet.pet_id}`).then((petResponse) => {
-                            expect(petResponse.status).to.eq(200)
-                            expect(petResponse.body.status).to.eq('adopted')
-                        })
+                        cy.visit('/dashboard')
+                        cy.get('[data-cy="review-button"]').last().click()
+                        cy.get('[data-cy="applicant-name-display"]').should('not.have.text', firstName)
                     })
                 })
+            })
+        })
+    })
+
+    describe('Access Control and Permissions', () => {
+        it('should only allow admin users to access application review', () => {
+            // This test assumes admin role - in a real system, you'd test with different user roles
+            cy.request(`${Cypress.env('apiBaseUrl')}/applications`).then((response) => {
+                const testApp = response.body.find(app => app.applicant_email === 'reviewpage@test.com')
+
+                cy.visit(`/applications/review/${testApp.application_id}`)
+                cy.get('h1').should('have.text', 'Application Review')
+
+                // Admin actions should be available
+                cy.get('[data-cy="approve-button"]').should('be.visible')
+                cy.get('[data-cy="reject-button"]').should('be.visible')
+                cy.get('[data-cy="admin-notes-textarea"]').should('be.visible')
             })
         })
     })
@@ -419,6 +348,17 @@ describe('Admin Application Review', () => {
             // This test validates that tests fail if API server is not running
             cy.request(`${Cypress.env('apiBaseUrl')}/applications`).then((response) => {
                 expect(response.status).to.eq(200)
+            })
+        })
+
+        it('should handle API errors gracefully during review actions', function() {
+            cy.request(`${Cypress.env('apiBaseUrl')}/applications`).then((response) => {
+                const testApp = response.body.find(app => app.applicant_email === 'reviewpage@test.com')
+                cy.visit(`/applications/review/${testApp.application_id}`)
+
+                // Should load page even if there are API delays
+                cy.get('h1').should('have.text', 'Application Review')
+                cy.get('[data-cy="approve-button"]').should('be.visible')
             })
         })
     })

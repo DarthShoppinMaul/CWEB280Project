@@ -12,25 +12,25 @@ function getApiBaseUrl() {
  */
 Cypress.Commands.add('loginEnhanced', () => {
     cy.session('admin-login-enhanced', () => {
-        // Step 1: Clear any existing cookies and localStorage
+        //  Clear any existing cookies and localStorage
         cy.clearCookies()
         cy.clearLocalStorage()
 
-        // Step 2: Visit login page and wait for it to load
+        //  Visit login page and wait for it to load
         cy.visit('/login')
         cy.get('[data-cy="email-input"]').should('be.visible')
 
-        // Step 3: Fill in credentials
+        //  Fill in credentials
         cy.get('[data-cy="email-input"]').clear().type('test@t.ca')
         cy.get('[data-cy="password-input"]').clear().type('123456Pw')
 
-        // Step 4: Submit the form
+        //  Submit the form
         cy.get('[data-cy="login-button"]').click()
 
-        // Step 5: Wait for redirect to complete
+        //  Wait for redirect to complete
         cy.url().should('include', '/pets', { timeout: 15000 })
 
-        // Step 6: Verify authentication worked by making API call
+        // Verify authentication worked by making API call
         cy.request({
             method: 'GET',
             url: `${getApiBaseUrl()}/auth/me`,
@@ -40,7 +40,7 @@ Cypress.Commands.add('loginEnhanced', () => {
             expect(response.body).to.have.property('email', 'test@t.ca')
         })
 
-        // Step 7: Ensure we're actually logged in by checking the page content
+
         cy.get('h1').should('exist') // Should have a heading on the pets page
     }, {
         // Session validation - check if we're still authenticated

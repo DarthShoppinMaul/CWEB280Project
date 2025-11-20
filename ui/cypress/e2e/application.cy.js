@@ -13,15 +13,13 @@
  * - Disabled for Unavailable Pets (can't apply for adopted pets)
  * - Guest Application Restriction (non-logged users redirected to login)
  *
- * Note: Tests follow corrected guidelines:
- * - No cy.contains or cy.intercept usage
  * - Tests both UI and API functionality
  * - Will fail if API server is not running
  */
 
 describe('Adoption Applications', () => {
     beforeEach(() => {
-        cy.waitForAPI()
+        cy.testAPI()
     })
 
     afterEach(() => {
@@ -31,7 +29,7 @@ describe('Adoption Applications', () => {
     describe('Guest User Restrictions', () => {
         it('should redirect non-logged-in user to login page when trying to apply', () => {
             // Create a test pet first
-            cy.login()
+            cy.loginEnhanced()
             cy.createTestLocation().then((location) => {
                 cy.createTestPet(location.location_id, 'approved').then((pet) => {
                     // Logout and try to apply
@@ -59,7 +57,7 @@ describe('Adoption Applications', () => {
 
     describe('Application Form Access', () => {
         beforeEach(() => {
-            cy.login()
+            cy.loginEnhanced()
         })
 
         it('should navigate to application form from pet details page', () => {
@@ -124,7 +122,7 @@ describe('Adoption Applications', () => {
 
     describe('Application Form Validation', () => {
         beforeEach(() => {
-            cy.login()
+            cy.loginEnhanced()
             cy.createTestLocation().then((location) => {
                 cy.createTestPet(location.location_id, 'approved').then((pet) => {
                     cy.visit(`/apply/${pet.pet_id}`)
@@ -171,26 +169,18 @@ describe('Adoption Applications', () => {
             cy.get('[data-cy="applicant-email-error"]').should('have.text', 'Please enter a valid email address')
         })
 
-        it('should clear individual field errors as user enters valid input', () => {
-            // Trigger errors first
+        it('should validate phone number format', () => {
+            cy.get('[data-cy="applicant-phone-input"]').type('invalid-phone')
             cy.get('[data-cy="submit-application-button"]').click()
-            cy.get('[data-cy="applicant-name-error"]').should('be.visible')
-            cy.get('[data-cy="applicant-email-error"]').should('be.visible')
 
-            // Fill name field - should clear only name error
-            cy.get('[data-cy="applicant-name-input"]').type('John Doe')
-            cy.get('[data-cy="applicant-name-error"]').should('not.exist')
-            cy.get('[data-cy="applicant-email-error"]').should('be.visible')
-
-            // Fill email field - should clear email error
-            cy.get('[data-cy="applicant-email-input"]').type('john@example.com')
-            cy.get('[data-cy="applicant-email-error"]').should('not.exist')
+            cy.get('[data-cy="applicant-phone-error"]').should('be.visible')
+            cy.get('[data-cy="applicant-phone-error"]').should('have.text', 'Please enter a valid phone number')
         })
     })
 
     describe('Successful Application Submission', () => {
         beforeEach(() => {
-            cy.login()
+            cy.loginEnhanced()
             cy.createTestLocation().then((location) => {
                 cy.createTestPet(location.location_id, 'approved').then((pet) => {
                     cy.visit(`/apply/${pet.pet_id}`)
@@ -199,19 +189,18 @@ describe('Adoption Applications', () => {
             })
         })
 
-        it('should submit adoption application with valid data', function() {
-            // Fill out complete application form
+        it('should successfully submit valid application', function() {
+            // Fill out all required fields
             cy.get('[data-cy="applicant-name-input"]').type('John Doe')
             cy.get('[data-cy="applicant-email-input"]').type('john.doe@example.com')
             cy.get('[data-cy="applicant-phone-input"]').type('(555) 123-4567')
-            cy.get('[data-cy="applicant-address-input"]').type('123 Main St, Toronto, ON')
+            cy.get('[data-cy="applicant-address-input"]').type('123 Main Street, City, State 12345')
             cy.get('[data-cy="housing-type-select"]').select('house')
             cy.get('[data-cy="has-yard-select"]').select('yes')
             cy.get('[data-cy="other-pets-select"]').select('no')
             cy.get('[data-cy="experience-input"]').type('I have had dogs for over 10 years and understand their needs.')
-            cy.get('[data-cy="reason-input"]').type('I am looking for a loving companion and can provide a great home.')
+            cy.get('[data-cy="reason-input"]').type('I want to provide a loving home for a pet in need.')
 
-            // Submit application
             cy.get('[data-cy="submit-application-button"]').click()
 
             // Should show success message and redirect
@@ -256,7 +245,7 @@ describe('Adoption Applications', () => {
 
     describe('Duplicate Application Prevention', () => {
         beforeEach(() => {
-            cy.login()
+            cy.loginEnhanced()
         })
 
         it('should prevent user from applying for the same pet twice', () => {
@@ -290,7 +279,7 @@ describe('Adoption Applications', () => {
 
     describe('My Applications Page', () => {
         beforeEach(() => {
-            cy.login()
+            cy.loginEnhanced()
         })
 
         it('should display user applications with correct information', () => {

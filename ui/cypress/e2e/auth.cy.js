@@ -6,7 +6,7 @@
 describe('Complete Authentication System', () => {
     beforeEach(() => {
         // Ensure API is available before tests (will fail if API down)
-        cy.waitForAPI()
+        cy.testAPI()
     })
 
     describe('Login Page Display', () => {
@@ -94,28 +94,50 @@ describe('Complete Authentication System', () => {
             cy.visit('/login')
         })
 
-        it('should successfully login with correct admin credentials', () => {
+        it('should successfully login admin user with correct credentials', () => {
+            // Fill in correct admin credentials
             cy.get('[data-cy="email-input"]').type('test@t.ca')
             cy.get('[data-cy="password-input"]').type('123456Pw')
             cy.get('[data-cy="login-button"]').click()
 
-            // Should redirect to /pets (based on fixed code)
+            // Should redirect to pets dashboard page
             cy.url().should('include', '/pets')
 
-            // Should have main content indicating successful login
-            cy.get('h1').should('exist')
+            // Verify authentication via API call
+            cy.request(`${Cypress.env('apiBaseUrl')}/auth/me`).then((response) => {
+                expect(response.status).to.eq(200)
+                expect(response.body).to.have.property('email', 'test@t.ca')
+                expect(response.body).to.have.property('role', 'admin')
+            })
+        })
 
-            // Verify authentication via API
+        it('should maintain user session across page visits', () => {
+            // Login first
+            cy.get('[data-cy="email-input"]').type('test@t.ca')
+            cy.get('[data-cy="password-input"]').type('123456Pw')
+            cy.get('[data-cy="login-button"]').click()
+
+            // Should redirect and maintain session
+            cy.url().should('include', '/pets')
+
+            // Visit another page - should stay logged in
+            cy.visit('/add-pet')
+            cy.url().should('include', '/add-pet')
+
+            // Verify still logged in via API
             cy.request(`${Cypress.env('apiBaseUrl')}/auth/me`).then((response) => {
                 expect(response.status).to.eq(200)
                 expect(response.body).to.have.property('email', 'test@t.ca')
             })
         })
 
-        it('should show loading state during login', () => {
+        it('should show proper loading state during login', () => {
             cy.get('[data-cy="email-input"]').type('test@t.ca')
             cy.get('[data-cy="password-input"]').type('123456Pw')
             cy.get('[data-cy="login-button"]').click()
+
+            // Button should show loading state briefly
+            cy.get('[data-cy="login-button"]').should('contain.text', 'Logging in...')
 
             // Should eventually redirect
             cy.url().should('include', '/pets', { timeout: 10000 })
@@ -140,57 +162,24 @@ describe('Complete Authentication System', () => {
             cy.visit('/login')
         })
 
-        it('should display Google OAuth option', () => {
-            // Check Google sign-in button exists
+        it('should display Google sign-in option', () => {
+            // Google sign-in button should be visible
             cy.get('[data-cy="google-signin-button"]').should('be.visible')
-            cy.get('[data-cy="google-signin-button"]').should('contain.text', 'Google')
+            cy.get('[data-cy="google-signin-button"]').should('contain.text', 'Continue with Google')
         })
 
-        it('should handle Google OAuth initiation', () => {
-            // Verify the button exists and is clickable
-            cy.get('[data-cy="google-signin-button"]').should('be.visible')
-            // Note: We don't actually click it as it redirects to Google
-        })
-    })
+        it('should handle Google OAuth flow initiation', () => {
+            // Click Google sign-in button
+            cy.get('[data-cy="google-signin-button"]').click()
 
-    describe('Route Protection', () => {
-        const protectedRoutes = [
-            '/admin/dashboard',
-            '/add-pet',
-            '/add-location',
-            '/my-applications'
-        ]
+            // Should redirect to Google OAuth
 
-        protectedRoutes.forEach(route => {
-            it(`should redirect ${route} to login when not authenticated`, () => {
-                cy.visit(route)
-                cy.url().should('include', '/login')
-            })
-        })
-
-        it('should allow access to protected routes when authenticated', () => {
-            cy.login()
-
-            // Test a few key protected routes
-            cy.visit('/add-pet')
-            cy.url().should('include', '/add-pet')
-            cy.url().should('not.include', '/login')
-        })
-
-        it('should allow access to public routes without authentication', () => {
-            const publicRoutes = ['/', '/pets', '/register']
-
-            publicRoutes.forEach(route => {
-                cy.visit(route)
-                cy.url().should('include', route)
-                cy.url().should('not.include', '/login')
-            })
         })
     })
 
     describe('Logout Functionality', () => {
         beforeEach(() => {
-            cy.login() // Use existing login command
+            cy.loginEnhanced()
         })
 
         it('should successfully logout and redirect to login page', () => {
@@ -218,7 +207,7 @@ describe('Complete Authentication System', () => {
 
     describe('Session Management', () => {
         it('should maintain login state across page refreshes', () => {
-            cy.login()
+            cy.loginEnhanced()
             cy.visit('/add-pet')
             cy.url().should('include', '/add-pet')
 

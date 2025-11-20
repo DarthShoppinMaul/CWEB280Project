@@ -270,7 +270,7 @@ def seed_database():
 
         db.commit()
 
-        print(f"✓ Added {len(favorites)} sample favorites\n")
+        print(f" Added {len(favorites)} sample favorites\n")
 
         # Print success summary
         print("=" * 60)
