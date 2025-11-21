@@ -39,7 +39,7 @@ def seed_database():
         existing_pets = db.query(m.Pet).count()
 
         if existing_users > 0 or existing_locations > 0 or existing_pets > 0:
-            print(f"✓Database already has data:")
+            print(f"Database already has data:")
             print(f"   • {existing_users} users")
             print(f"   • {existing_locations} locations")
             print(f"   • {existing_pets} pets")

@@ -19,10 +19,10 @@ export default function Login() {
 
     // Redirect if already authenticated
     useEffect(() => {
-        if (isAuthenticated && !isSubmitting) {
+        if (isAuthenticated) {
             navigate('/pets');
         }
-    }, [isAuthenticated, navigate, isSubmitting]);
+    }, [isAuthenticated, navigate]);
 
     // Check for OAuth error in URL
     useEffect(() => {
@@ -68,15 +68,7 @@ export default function Login() {
             const result = await login(email, password, rememberMe);
 
             if (result.success) {
-                console.log('Login successful with JWT');
-
-                // Small delay to ensure context updates
-                setTimeout(() => {
-                    if (!isAuthenticated) {
-                        console.log('Fallback redirect to /pets');
-                        navigate('/pets');
-                    }
-                }, 100);
+                setIsSubmitting(false);
             } else {
                 setErrors({submit: result.error || 'Login failed'});
                 setIsSubmitting(false);

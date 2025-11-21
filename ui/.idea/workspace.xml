@@ -6,7 +6,6 @@
   <component name="ChangeListManager">
     <list default="true" id="6b00ffbd-7a02-4a67-b8ea-3de55b5fc5ba" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/context/AuthContext.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/context/AuthContext.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/react/pages/Login.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/react/pages/Login.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/services/api.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/services/api.js" afterDir="false" />
     </list>
@@ -62,7 +61,7 @@
     &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
 }</component>
-  <component name="RunManager" selected="Cypress.all tests in adminreview.cy.js">
+  <component name="RunManager" selected="npm.dev">
     <configuration name="all tests in adminreview.cy.js" type="JavaScriptTestRunnerCypress" temporary="true">
       <node-interpreter value="project" />
       <cypress-package value="$PROJECT_DIR$/node_modules/cypress" />
@@ -93,16 +92,6 @@
       <test-file value="$PROJECT_DIR$/cypress/e2e/login.cy.js" />
       <method v="2" />
     </configuration>
-    <configuration name="all tests in petbrowsing.cy.js" type="JavaScriptTestRunnerCypress" temporary="true">
-      <node-interpreter value="project" />
-      <cypress-package value="$PROJECT_DIR$/node_modules/cypress" />
-      <working-dir value="$PROJECT_DIR$" />
-      <cypress-options value="-q" />
-      <envs />
-      <scope-kind value="TEST_FILE" />
-      <test-file value="$PROJECT_DIR$/cypress/e2e/petbrowsing.cy.js" />
-      <method v="2" />
-    </configuration>
     <configuration name="all tests in pets.cy.js" type="JavaScriptTestRunnerCypress" temporary="true">
       <node-interpreter value="project" />
       <cypress-package value="$PROJECT_DIR$/node_modules/cypress" />
@@ -113,20 +102,30 @@
       <test-file value="$PROJECT_DIR$/cypress/e2e/pets.cy.js" />
       <method v="2" />
     </configuration>
+    <configuration name="dev" type="js.build_tools.npm" temporary="true" nameIsGenerated="true">
+      <package-json value="$PROJECT_DIR$/package.json" />
+      <command value="run" />
+      <scripts>
+        <script value="dev" />
+      </scripts>
+      <node-interpreter value="project" />
+      <envs />
+      <method v="2" />
+    </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="npm.dev" />
         <item itemvalue="Cypress.all tests in adminreview.cy.js" />
         <item itemvalue="Cypress.all tests in application.cy.js" />
         <item itemvalue="Cypress.all tests in pets.cy.js" />
         <item itemvalue="Cypress.all tests in login.cy.js" />
-        <item itemvalue="Cypress.all tests in petbrowsing.cy.js" />
       </list>
     </recent_temporary>
   </component>
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-js-predefined-d6986cc7102b-7c0b70fcd90d-JavaScript-WS-242.21829.149" />
+        <option value="bundled-js-predefined-d6986cc7102b-b598e85cdad2-JavaScript-WS-252.25557.126" />
       </set>
     </attachedChunks>
   </component>
@@ -144,6 +143,7 @@
       <workItem from="1763481694189" duration="3607000" />
       <workItem from="1763590487356" duration="1380000" />
       <workItem from="1763591902370" duration="6988000" />
+      <workItem from="1763734988857" duration="2287000" />
     </task>
     <servers />
   </component>

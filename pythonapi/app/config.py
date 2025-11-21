@@ -50,11 +50,11 @@ GOOGLE_REDIRECT_URI = os.getenv(
 
 # Validate Google OAuth configuration
 if GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET:
-    print(f"✓ Google OAuth configured")
-    print(f"  Client ID: {GOOGLE_CLIENT_ID[:20]}...")
-    print(f"  Redirect URI: {GOOGLE_REDIRECT_URI}")
+    print(f" Google OAuth configured")
+    print(f" Client ID: {GOOGLE_CLIENT_ID[:20]}...")
+    print(f" Redirect URI: {GOOGLE_REDIRECT_URI}")
 else:
-    print("⚠ Google OAuth not configured (set credentials in googleauth.env)")
+    print(" Google OAuth not configured (set credentials in googleauth.env)")
 
 # Frontend URL (where backend redirects after successful OAuth)
 FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:5173")

@@ -252,6 +252,14 @@ export const applicationsAPI = {
         });
         return handleResponse(response);
     },
+
+    delete: async (id) => {
+        const response = await fetch(`${API_BASE_URL}/applications/${id}`, {
+            method: 'DELETE',
+            credentials: 'include',
+        });
+        return handleResponse(response);
+    },
 };
 
 

@@ -315,3 +315,31 @@ def update_application(
     db.refresh(application)
 
     return application
+
+
+@router.delete("/{application_id}")
+def delete_application(
+        application_id: int,
+        request: Request,
+        db: Session = Depends(get_db)
+):
+    # Get current user from JWT token
+    user = get_current_user(request, db)
+
+    # Find application in database
+    application = db.query(Application).filter(
+        Application.application_id == application_id
+    ).first()
+
+    if not application:
+        raise HTTPException(status_code=404, detail="Application not found")
+
+    # Authorization check - users can only delete their own
+    if not user.is_admin and application.user_id != user.user_id:
+        raise HTTPException(status_code=403, detail="Not authorized")
+
+    # Perform deletion
+    db.delete(application)
+    db.commit()
+
+    return {"ok": True, "message": "Application deleted successfully"}
