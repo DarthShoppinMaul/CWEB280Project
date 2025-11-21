@@ -214,6 +214,7 @@ export default function AdoptionApplicationForm() {
                             onChange={handleChange}
                             disabled={isSubmitting}
                             placeholder="+1 (555) 123-4567"
+                            data-cy="applicant-phone-input"
                         />
                         {errors.contactPhone && (
                             <div className="text-red-400 text-sm mt-1">{errors.contactPhone}</div>
@@ -231,6 +232,7 @@ export default function AdoptionApplicationForm() {
                             value={formData.livingSituation}
                             onChange={handleChange}
                             disabled={isSubmitting}
+                            data-cy="housing-type-select"
                         >
                             <option value="">Select your living situation</option>
                             <option value="house">House (owned)</option>
@@ -312,6 +314,7 @@ export default function AdoptionApplicationForm() {
                             type="submit"
                             className="btn flex-1"
                             disabled={isSubmitting}
+                            data-cy="submit-application-button"
                         >
                             {isSubmitting ? 'Submitting...' : 'Submit Application'}
                         </button>

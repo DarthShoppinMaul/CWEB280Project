@@ -177,6 +177,7 @@ export default function Registration() {
                             onChange={handleChange}
                             disabled={isSubmitting}
                             placeholder="your@email.com"
+                            data-cy="email-input"
                         />
                         {errors.email && (
                             <div className="text-red-400 text-sm mt-1">{errors.email}</div>
@@ -194,6 +195,7 @@ export default function Registration() {
                             onChange={handleChange}
                             disabled={isSubmitting}
                             placeholder="John Doe"
+                            data-cy="displayName-input"
                         />
                         {errors.displayName && (
                             <div className="text-red-400 text-sm mt-1">{errors.displayName}</div>
@@ -211,6 +213,7 @@ export default function Registration() {
                             onChange={handleChange}
                             disabled={isSubmitting}
                             placeholder="+1 (555) 123-4567"
+                            data-cy="phone-input"
                         />
                         {errors.phone && (
                             <div className="text-red-400 text-sm mt-1">{errors.phone}</div>
@@ -228,6 +231,7 @@ export default function Registration() {
                             onChange={handleChange}
                             disabled={isSubmitting}
                             placeholder="******"
+                            data-cy="password-input"
                         />
                         {errors.password && (
                             <div className="text-red-400 text-sm mt-1">{errors.password}</div>
@@ -246,6 +250,7 @@ export default function Registration() {
                             onChange={handleChange}
                             disabled={isSubmitting}
                             placeholder="*****"
+                            data-cy="confirm-password-input"
                         />
                         {errors.confirmPassword && (
                             <div className="text-red-400 text-sm mt-1">{errors.confirmPassword}</div>
@@ -284,6 +289,7 @@ export default function Registration() {
                         type="submit"
                         className="btn w-full mb-4"
                         disabled={isSubmitting}
+                        data-cy="register-button"
                     >
                         {isSubmitting ? 'Creating Account...' : 'Create Account'}
                     </button>
@@ -329,7 +335,7 @@ export default function Registration() {
                     {/* Link to login */}
                     <div className="mt-6 text-sm text-center text-[#B6C6DA]">
                         Already have an account?{' '}
-                        <Link to="/login" className="text-[#64FFDA] hover:underline font-medium">
+                        <Link to="/login" className="text-[#64FFDA] hover:underline font-medium" data-cy="login-link">
                             Login
                         </Link>
                     </div>

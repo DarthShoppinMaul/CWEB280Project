@@ -5,19 +5,25 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="6b00ffbd-7a02-4a67-b8ea-3de55b5fc5ba" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/cypress/e2e/login.cy.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/cypress/e2e/petbrowsing.cy.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/cypress/e2e/adminreview.cy.js" beforeDir="false" afterPath="$PROJECT_DIR$/cypress/e2e/adminreview.cy.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/cypress/e2e/application.cy.js" beforeDir="false" afterPath="$PROJECT_DIR$/cypress/e2e/application.cy.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/cypress/e2e/auth.cy.js" beforeDir="false" afterPath="$PROJECT_DIR$/cypress/e2e/auth.cy.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cypress/e2e/enhancedauth.cy.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/cypress/e2e/home.cy.js" beforeDir="false" afterPath="$PROJECT_DIR$/cypress/e2e/home.cy.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cypress/e2e/home.cy.js" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/cypress/e2e/integration.cy.js" beforeDir="false" afterPath="$PROJECT_DIR$/cypress/e2e/integration.cy.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/cypress/e2e/locations.cy.js" beforeDir="false" afterPath="$PROJECT_DIR$/cypress/e2e/locations.cy.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/cypress/e2e/navigation.cy.js" beforeDir="false" afterPath="$PROJECT_DIR$/cypress/e2e/navigation.cy.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/cypress/e2e/pets.cy.js" beforeDir="false" afterPath="$PROJECT_DIR$/cypress/e2e/pets.cy.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/cypress/e2e/registration.cy.js" beforeDir="false" afterPath="$PROJECT_DIR$/cypress/e2e/registration.cy.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cypress/support/cypress-auth-commands.js" beforeDir="false" afterPath="$PROJECT_DIR$/cypress/support/authcommands.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cypress/support/e2e.js" beforeDir="false" afterPath="$PROJECT_DIR$/cypress/support/e2e.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cypress/e2e/usermanagement.cy.js" beforeDir="false" afterPath="$PROJECT_DIR$/cypress/e2e/usermanagement.cy.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cypress/support/commands.js" beforeDir="false" afterPath="$PROJECT_DIR$/cypress/support/commands.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/react/pages/AdoptionApplicationForm.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/react/pages/AdoptionApplicationForm.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/react/pages/PetDetails.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/react/pages/PetDetails.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/react/pages/PetList.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/react/pages/PetList.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/react/pages/Registration.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/react/pages/Registration.jsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -45,7 +51,13 @@
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
     "Cypress.all tests in adminreview.cy.js.executor": "Run",
+    "Cypress.all tests in application.cy.js.executor": "Run",
+    "Cypress.all tests in auth.cy.js.executor": "Run",
+    "Cypress.all tests in locations.cy.js.executor": "Run",
+    "Cypress.all tests in login.cy.js.executor": "Run",
     "Cypress.all tests in navigation.cy.js.executor": "Run",
+    "Cypress.all tests in petbrowsing.cy.js.executor": "Run",
+    "Cypress.all tests in pets.cy.js.executor": "Run",
     "ModuleVcsDetector.initialDetectionPerformed": "true",
     "Node.js.verifyservers.cjs.executor": "Run",
     "Node.js.verifyservers.js.executor": "Run",
@@ -53,18 +65,19 @@
     "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
     "RunOnceActivity.git.unshallow": "true",
     "git-widget-placeholder": "main",
-    "last_opened_file_path": "C:/Users/musselman1881/CWEB280Project/ui",
+    "last_opened_file_path": "C:/Users/over_/Downloads/claude-code-jetbrains-plugin-0.1.12-beta.zip",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
     "node.js.selected.package.tslint": "(autodetect)",
     "nodejs_package_manager_path": "npm",
     "npm.dev.executor": "Run",
+    "settings.editor.selected.configurable": "preferences.pluginManager",
     "ts.external.directory.path": "C:\\Program Files\\JetBrains\\WebStorm 2024.2.1\\plugins\\javascript-plugin\\jsLanguageServicesImpl\\external",
     "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
-  <component name="RunManager">
+  <component name="RunManager" selected="Cypress.all tests in adminreview.cy.js">
     <configuration name="all tests in adminreview.cy.js" type="JavaScriptTestRunnerCypress" temporary="true">
       <node-interpreter value="project" />
       <cypress-package value="$PROJECT_DIR$/node_modules/cypress" />
@@ -75,31 +88,53 @@
       <test-file value="$PROJECT_DIR$/cypress/e2e/adminreview.cy.js" />
       <method v="2" />
     </configuration>
-    <configuration name="all tests in navigation.cy.js" type="JavaScriptTestRunnerCypress" temporary="true">
+    <configuration name="all tests in application.cy.js" type="JavaScriptTestRunnerCypress" temporary="true">
       <node-interpreter value="project" />
       <cypress-package value="$PROJECT_DIR$/node_modules/cypress" />
       <working-dir value="$PROJECT_DIR$" />
       <cypress-options value="-q" />
       <envs />
       <scope-kind value="TEST_FILE" />
-      <test-file value="$PROJECT_DIR$/cypress/e2e/navigation.cy.js" />
+      <test-file value="$PROJECT_DIR$/cypress/e2e/application.cy.js" />
       <method v="2" />
     </configuration>
-    <configuration name="dev" type="js.build_tools.npm" temporary="true" nameIsGenerated="true">
-      <package-json value="$PROJECT_DIR$/package.json" />
-      <command value="run" />
-      <scripts>
-        <script value="dev" />
-      </scripts>
+    <configuration name="all tests in login.cy.js" type="JavaScriptTestRunnerCypress" temporary="true">
       <node-interpreter value="project" />
+      <cypress-package value="$PROJECT_DIR$/node_modules/cypress" />
+      <working-dir value="$PROJECT_DIR$" />
+      <cypress-options value="-q" />
       <envs />
+      <scope-kind value="TEST_FILE" />
+      <test-file value="$PROJECT_DIR$/cypress/e2e/login.cy.js" />
+      <method v="2" />
+    </configuration>
+    <configuration name="all tests in petbrowsing.cy.js" type="JavaScriptTestRunnerCypress" temporary="true">
+      <node-interpreter value="project" />
+      <cypress-package value="$PROJECT_DIR$/node_modules/cypress" />
+      <working-dir value="$PROJECT_DIR$" />
+      <cypress-options value="-q" />
+      <envs />
+      <scope-kind value="TEST_FILE" />
+      <test-file value="$PROJECT_DIR$/cypress/e2e/petbrowsing.cy.js" />
+      <method v="2" />
+    </configuration>
+    <configuration name="all tests in pets.cy.js" type="JavaScriptTestRunnerCypress" temporary="true">
+      <node-interpreter value="project" />
+      <cypress-package value="$PROJECT_DIR$/node_modules/cypress" />
+      <working-dir value="$PROJECT_DIR$" />
+      <cypress-options value="-q" />
+      <envs />
+      <scope-kind value="TEST_FILE" />
+      <test-file value="$PROJECT_DIR$/cypress/e2e/pets.cy.js" />
       <method v="2" />
     </configuration>
     <recent_temporary>
       <list>
         <item itemvalue="Cypress.all tests in adminreview.cy.js" />
-        <item itemvalue="Cypress.all tests in navigation.cy.js" />
-        <item itemvalue="npm.dev" />
+        <item itemvalue="Cypress.all tests in application.cy.js" />
+        <item itemvalue="Cypress.all tests in pets.cy.js" />
+        <item itemvalue="Cypress.all tests in login.cy.js" />
+        <item itemvalue="Cypress.all tests in petbrowsing.cy.js" />
       </list>
     </recent_temporary>
   </component>

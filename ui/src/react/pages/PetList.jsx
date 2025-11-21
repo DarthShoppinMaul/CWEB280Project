@@ -220,7 +220,7 @@ export default function PetList() {
             ) : (
                 <div className="grid-pets">
                     {filteredPets.map(pet => (
-                        <div key={pet.pet_id} className="card relative">
+                        <div key={pet.pet_id} className="card relative" data-cy="pet-card">
                             {/* Favorite heart icon - top right corner */}
                             {user && (
                                 <button

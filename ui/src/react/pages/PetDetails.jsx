@@ -199,6 +199,7 @@ export default function PetDetails() {
                                         <button
                                             onClick={handleApplyToAdopt}
                                             className="btn w-full text-lg py-3"
+                                            data-cy="apply-button"
                                         >
                                             Apply to Adopt {pet.name}
                                         </button>
