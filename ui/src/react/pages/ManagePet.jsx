@@ -7,19 +7,16 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { petsAPI, locationsAPI, API_BASE_URL } from '../../services/api.js';
 
-// File upload constraints
 const MAX_FILE_SIZE_MB = 2;
 const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
 
 export default function ManagePets() {
     const navigate = useNavigate();
 
-    // VIEW MODE STATE
-    const [viewMode, setViewMode] = useState('list'); // 'list', 'add', 'edit'
+    const [viewMode, setViewMode] = useState('list');
     const [pets, setPets] = useState([]);
     const [loadingPets, setLoadingPets] = useState(true);
 
-    // FORM FIELDS
     const [editingPetId, setEditingPetId] = useState(null);
     const [name, setName] = useState('');
     const [species, setSpecies] = useState('');
@@ -29,14 +26,12 @@ export default function ManagePets() {
     const [photo, setPhoto] = useState(null);
     const [currentPhotoUrl, setCurrentPhotoUrl] = useState('');
 
-    // ADDITIONAL STATE
     const [locations, setLocations] = useState([]);
     const [errors, setErrors] = useState({});
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [loadingLocations, setLoadingLocations] = useState(true);
     const [successMessage, setSuccessMessage] = useState('');
 
-    // LOAD DATA ON MOUNT
     useEffect(() => {
         loadLocations();
         loadPets();
@@ -66,23 +61,19 @@ export default function ManagePets() {
         }
     };
 
-    // VALIDATION FUNCTION
     const validateForm = () => {
         const newErrors = {};
 
-        // Name validation
         if (!name.trim()) {
             newErrors.name = 'Pet name is required';
         } else if (name.trim().length < 2) {
             newErrors.name = 'Pet name must be at least 2 characters';
         }
 
-        // Species validation
         if (!species.trim()) {
             newErrors.species = 'Species is required';
         }
 
-        // Age validation
         if (!age) {
             newErrors.age = 'Age is required';
         } else {
@@ -94,12 +85,10 @@ export default function ManagePets() {
             }
         }
 
-        // Location validation
         if (!locationId) {
             newErrors.locationId = 'Please select a location';
         }
 
-        // Photo validation (optional field for edit, but must be valid if provided)
         if (photo) {
             if (photo.size > MAX_FILE_SIZE_BYTES) {
                 newErrors.photo = `File size must be less than ${MAX_FILE_SIZE_MB}MB`;
@@ -115,7 +104,6 @@ export default function ManagePets() {
         return Object.keys(newErrors).length === 0;
     };
 
-    // FILE INPUT HANDLER
     const handleFileChange = (e) => {
         const file = e.target.files?.[0];
         if (file) {
@@ -128,7 +116,6 @@ export default function ManagePets() {
         }
     };
 
-    // FORM SUBMISSION HANDLER
     const handleSubmit = async (e) => {
         e.preventDefault();
 
@@ -143,7 +130,6 @@ export default function ManagePets() {
         setIsSubmitting(true);
 
         try {
-            // Create FormData for multipart/form-data upload
             const formData = new FormData();
             formData.append('name', name.trim());
             formData.append('species', species.trim());
@@ -159,16 +145,13 @@ export default function ManagePets() {
             }
 
             if (viewMode === 'edit') {
-                // Update existing pet
                 await petsAPI.update(editingPetId, formData);
                 setSuccessMessage('Pet updated successfully!');
             } else {
-                // Create new pet
                 await petsAPI.create(formData);
                 setSuccessMessage('Pet added successfully!');
             }
 
-            // Reload pets and switch to list view
             await loadPets();
             handleCancel();
         } catch (err) {
@@ -180,7 +163,6 @@ export default function ManagePets() {
         }
     };
 
-    // EDIT BUTTON HANDLER
     const handleEdit = (pet) => {
         setEditingPetId(pet.pet_id);
         setName(pet.name);
@@ -195,7 +177,6 @@ export default function ManagePets() {
         setErrors({});
     };
 
-    // DELETE BUTTON HANDLER
     const handleDelete = async (petId) => {
         const pet = pets.find(p => p.pet_id === petId);
         if (!window.confirm(`Are you sure you want to delete ${pet?.name || 'this pet'}? This action cannot be undone.`)) {
@@ -213,20 +194,17 @@ export default function ManagePets() {
         }
     };
 
-    // ADD NEW BUTTON HANDLER
     const handleAddNew = () => {
         setViewMode('add');
         handleClearForm();
         setSuccessMessage('');
     };
 
-    // CANCEL BUTTON HANDLER
     const handleCancel = () => {
         setViewMode('list');
         handleClearForm();
     };
 
-    // CLEAR FORM HANDLER
     const handleClearForm = () => {
         setEditingPetId(null);
         setName('');
@@ -239,31 +217,32 @@ export default function ManagePets() {
         setErrors({});
     };
 
-    // Helper function to get location name
     const getLocationName = (locationId) => {
         const location = locations.find(l => l.location_id === locationId);
         return location?.name || 'Unknown';
     };
 
-    // LOADING STATE
     if (loadingPets || loadingLocations) {
-        return <div className="text-center py-8">Loading...</div>;
+        return (
+            <div className="container-narrow">
+                <div className="text-center py-12">Loading...</div>
+            </div>
+        );
     }
 
-    // RENDER LIST VIEW
     if (viewMode === 'list') {
         return (
-            <>
-                <h1>Manage Pets</h1>
+            <div className="container-narrow">
+                <h1 className="text-3xl mb-6">Manage Pets</h1>
 
                 {successMessage && (
-                    <div className="mb-4 p-3 bg-green-100 border border-green-400 text-green-700 rounded">
+                    <div className="mb-4 p-3 bg-green-900/30 border border-green-500 text-green-400 rounded-xl">
                         {successMessage}
                     </div>
                 )}
 
                 {errors.submit && (
-                    <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+                    <div className="mb-4 p-3 bg-red-900/30 border border-red-500 text-red-400 rounded-xl">
                         {errors.submit}
                     </div>
                 )}
@@ -278,103 +257,90 @@ export default function ManagePets() {
                     </button>
                 </div>
 
-                <div className="panel">
+                <div className="panel overflow-x-auto">
                     <h2 className="text-xl font-bold mb-4">All Pets ({pets.length})</h2>
 
                     {pets.length === 0 ? (
-                        <p className="text-gray-600">No pets found. Add your first pet!</p>
+                        <p className="text-[#B6C6DA]">No pets found. Add your first pet!</p>
                     ) : (
-                        <div className="overflow-x-auto">
-                            <table className="w-full border-collapse">
-                                <thead>
-                                <tr>
-                                    <th className="border p-2 text-left bg-[#1b355e] text-white">Photo</th>
-                                    <th className="border p-2 text-left bg-[#1b355e] text-white">Name</th>
-                                    <th className="border p-2 text-left bg-[#1b355e] text-white">Species</th>
-                                    <th className="border p-2 text-left bg-[#1b355e] text-white">Age</th>
-                                    <th className="border p-2 text-left bg-[#1b355e] text-white">Location</th>
-                                    <th className="border p-2 text-left bg-[#1b355e] text-white">Status</th>
-                                    <th className="border p-2 text-center bg-[#1b355e] text-white">Actions</th>
+                        <table className="w-full">
+                            <thead>
+                            <tr className="border-b border-[#1b355e]">
+                                <th className="text-left py-3 px-4 font-medium text-[#E6F1FF]">Photo</th>
+                                <th className="text-left py-3 px-4 font-medium text-[#E6F1FF]">Name</th>
+                                <th className="text-left py-3 px-4 font-medium text-[#E6F1FF]">Species</th>
+                                <th className="text-left py-3 px-4 font-medium text-[#E6F1FF]">Age</th>
+                                <th className="text-left py-3 px-4 font-medium text-[#E6F1FF]">Location</th>
+                                <th className="text-left py-3 px-4 font-medium text-[#E6F1FF]">Status</th>
+                                <th className="text-right py-3 px-4 font-medium text-[#E6F1FF]">Actions</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {pets.map(pet => (
+                                <tr key={pet.pet_id} className="border-b border-[#1b355e] last:border-b-0">
+                                    <td className="py-3 px-4">
+                                        {pet.photo_url ? (
+                                            <img
+                                                src={`${API_BASE_URL}/${pet.photo_url}`}
+                                                alt={pet.name}
+                                                className="w-16 h-16 object-cover rounded"
+                                            />
+                                        ) : (
+                                            <div className="w-16 h-16 bg-[#152e56] rounded flex items-center justify-center text-[#B6C6DA] text-xs">
+                                                No photo
+                                            </div>
+                                        )}
+                                    </td>
+                                    <td className="py-3 px-4 font-medium">{pet.name}</td>
+                                    <td className="py-3 px-4">{pet.species}</td>
+                                    <td className="py-3 px-4">{pet.age} {pet.age === 1 ? 'yr' : 'yrs'}</td>
+                                    <td className="py-3 px-4">{getLocationName(pet.location_id)}</td>
+                                    <td className="py-3 px-4">
+                                        <span className={`badge ${pet.status === 'approved' ? 'bg-green-900/30 text-green-400' : 'bg-yellow-900/30 text-yellow-400'}`}>
+                                            {pet.status.charAt(0).toUpperCase() + pet.status.slice(1)}
+                                        </span>
+                                    </td>
+                                    <td className="py-3 px-4 text-right">
+                                        <button
+                                            className="btn-sm bg-[#64FFDA] text-[#081424] mr-2"
+                                            onClick={() => handleEdit(pet)}
+                                            data-cy={`edit-pet-${pet.pet_id}`}
+                                        >
+                                            Edit
+                                        </button>
+                                        <button
+                                            className="btn-sm btn-danger"
+                                            onClick={() => handleDelete(pet.pet_id)}
+                                            data-cy={`delete-pet-${pet.pet_id}`}
+                                        >
+                                            Delete
+                                        </button>
+                                    </td>
                                 </tr>
-                                </thead>
-                                <tbody>
-                                {pets.map(pet => {
-                                    const statusColors = {
-                                        approved: 'bg-green-100 text-green-800',
-                                        pending: 'bg-yellow-100 text-yellow-800'
-                                    };
-                                    return (
-                                        <tr key={pet.pet_id} className="hover:bg-gray-50">
-                                            <td className="border p-2">
-                                                {pet.photo_url ? (
-                                                    <img
-                                                        src={`${API_BASE_URL}/${pet.photo_url}`}
-                                                        alt={pet.name}
-                                                        className="w-16 h-16 object-cover rounded"
-                                                    />
-                                                ) : (
-                                                    <div className="w-16 h-16 bg-gray-200 rounded flex items-center justify-center text-gray-400 text-xs">
-                                                        No photo
-                                                    </div>
-                                                )}
-                                            </td>
-                                            <td className="border p-2 font-medium">{pet.name}</td>
-                                            <td className="border p-2">{pet.species}</td>
-                                            <td className="border p-2">{pet.age} {pet.age === 1 ? 'yr' : 'yrs'}</td>
-                                            <td className="border p-2">{getLocationName(pet.location_id)}</td>
-                                            <td className="border p-2">
-                                                <span className={`inline-block px-2 py-1 rounded text-xs ${statusColors[pet.status] || 'bg-gray-100 text-gray-800'}`}>
-                                                    {pet.status.charAt(0).toUpperCase() + pet.status.slice(1)}
-                                                </span>
-                                            </td>
-                                            <td className="border p-2">
-                                                <div className="flex gap-2 justify-center">
-                                                    <button
-                                                        className="btn-secondary text-sm px-3 py-1"
-                                                        onClick={() => handleEdit(pet)}
-                                                        data-cy={`edit-pet-${pet.pet_id}`}
-                                                    >
-                                                        Edit
-                                                    </button>
-                                                    <button
-                                                        className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700 text-sm"
-                                                        onClick={() => handleDelete(pet.pet_id)}
-                                                        data-cy={`delete-pet-${pet.pet_id}`}
-                                                    >
-                                                        Delete
-                                                    </button>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    );
-                                })}
-                                </tbody>
-                            </table>
-                        </div>
+                            ))}
+                            </tbody>
+                        </table>
                     )}
                 </div>
-            </>
+            </div>
         );
     }
 
-    // RENDER ADD/EDIT FORM VIEW
     return (
-        <>
-            <h1>{viewMode === 'edit' ? 'Edit Pet' : 'Add Pet'}</h1>
+        <div className="container-narrow">
+            <h1 className="text-3xl mb-6">{viewMode === 'edit' ? 'Edit Pet' : 'Add Pet'}</h1>
 
             <div className="panel">
                 {errors.submit && (
-                    <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+                    <div className="mb-4 p-3 bg-red-900/30 border border-red-500 text-red-400 rounded-xl">
                         {errors.submit}
                     </div>
                 )}
 
                 <form onSubmit={handleSubmit}>
-                    {/* NAME & SPECIES ROW */}
                     <div className="flex flex-wrap gap-4">
-                        {/* Pet Name Field */}
                         <div className="min-w-[240px] flex-1">
-                            <label>Pet Name *</label>
+                            <label className="block mb-2 text-sm font-medium">Pet Name *</label>
                             <input
                                 className={`input ${errors.name ? 'border-red-500' : ''}`}
                                 value={name}
@@ -385,15 +351,14 @@ export default function ManagePets() {
                                 data-cy="pet-name-input"
                             />
                             {errors.name && (
-                                <div className="text-red-500 text-sm mt-1" data-cy="pet-name-error">
+                                <div className="text-red-400 text-sm mt-1" data-cy="pet-name-error">
                                     {errors.name}
                                 </div>
                             )}
                         </div>
 
-                        {/* Species Field */}
                         <div className="min-w-[240px] flex-1">
-                            <label>Species *</label>
+                            <label className="block mb-2 text-sm font-medium">Species *</label>
                             <input
                                 className={`input ${errors.species ? 'border-red-500' : ''}`}
                                 value={species}
@@ -404,18 +369,16 @@ export default function ManagePets() {
                                 data-cy="pet-species-input"
                             />
                             {errors.species && (
-                                <div className="text-red-500 text-sm mt-1" data-cy="pet-species-error">
+                                <div className="text-red-400 text-sm mt-1" data-cy="pet-species-error">
                                     {errors.species}
                                 </div>
                             )}
                         </div>
                     </div>
 
-                    {/* AGE & LOCATION ROW */}
                     <div className="flex flex-wrap gap-4 mt-4">
-                        {/* Age Field */}
                         <div className="max-w-[200px] flex-1">
-                            <label>Age (years) *</label>
+                            <label className="block mb-2 text-sm font-medium">Age (years) *</label>
                             <input
                                 className={`input ${errors.age ? 'border-red-500' : ''}`}
                                 type="number"
@@ -429,15 +392,14 @@ export default function ManagePets() {
                                 data-cy="pet-age-input"
                             />
                             {errors.age && (
-                                <div className="text-red-500 text-sm mt-1" data-cy="pet-age-error">
+                                <div className="text-red-400 text-sm mt-1" data-cy="pet-age-error">
                                     {errors.age}
                                 </div>
                             )}
                         </div>
 
-                        {/* Location Dropdown */}
                         <div className="min-w-[240px] flex-1">
-                            <label>Location *</label>
+                            <label className="block mb-2 text-sm font-medium">Location *</label>
                             <select
                                 className={`input ${errors.locationId ? 'border-red-500' : ''}`}
                                 value={locationId}
@@ -455,16 +417,15 @@ export default function ManagePets() {
                                 ))}
                             </select>
                             {errors.locationId && (
-                                <div className="text-red-500 text-sm mt-1" data-cy="pet-location-error">
+                                <div className="text-red-400 text-sm mt-1" data-cy="pet-location-error">
                                     {errors.locationId}
                                 </div>
                             )}
                         </div>
                     </div>
 
-                    {/* DESCRIPTION FIELD */}
                     <div className="mt-4">
-                        <label>Description</label>
+                        <label className="block mb-2 text-sm font-medium">Description</label>
                         <textarea
                             className="textarea"
                             value={description}
@@ -474,18 +435,17 @@ export default function ManagePets() {
                         />
                     </div>
 
-                    {/* PHOTO UPLOAD FIELD */}
                     <div className="flex flex-wrap gap-4 mt-4">
                         <div className="max-w-[400px] flex-1">
-                            <label>Photo (Max {MAX_FILE_SIZE_MB}MB) {viewMode === 'edit' && '- Leave empty to keep current photo'}</label>
+                            <label className="block mb-2 text-sm font-medium">Photo (Max {MAX_FILE_SIZE_MB}MB) {viewMode === 'edit' && '- Leave empty to keep current photo'}</label>
                             {viewMode === 'edit' && currentPhotoUrl && (
                                 <div className="mb-2">
                                     <img
                                         src={`${API_BASE_URL}/${currentPhotoUrl}`}
                                         alt="Current"
-                                        className="w-32 h-32 object-cover rounded border"
+                                        className="w-32 h-32 object-cover rounded border border-[#1b355e]"
                                     />
-                                    <p className="text-sm text-gray-600 mt-1">Current photo</p>
+                                    <p className="text-sm text-[#B6C6DA] mt-1">Current photo</p>
                                 </div>
                             )}
                             <input
@@ -496,19 +456,18 @@ export default function ManagePets() {
                                 data-cy="pet-photo-input"
                             />
                             {errors.photo && (
-                                <div className="text-red-500 text-sm mt-1" data-cy="pet-photo-error">
+                                <div className="text-red-400 text-sm mt-1" data-cy="pet-photo-error">
                                     {errors.photo}
                                 </div>
                             )}
                             {photo && !errors.photo && (
-                                <div className="text-sm text-gray-600 mt-1">
+                                <div className="text-sm text-[#B6C6DA] mt-1">
                                     Selected: {photo.name} ({(photo.size / 1024 / 1024).toFixed(2)}MB)
                                 </div>
                             )}
                         </div>
                     </div>
 
-                    {/* FORM BUTTONS */}
                     <div className="h-4"/>
                     <button
                         type="submit"
@@ -532,6 +491,6 @@ export default function ManagePets() {
                     </button>
                 </form>
             </div>
-        </>
+        </div>
     );
 }
